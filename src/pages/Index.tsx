@@ -90,13 +90,9 @@ const FEATURES = [
 const GENERATE_LESSON_URL = "https://functions.poehali.dev/1186dab1-1c68-4be5-95d4-74d1e710571e";
 
 const STEPS = [
-  { id: 1, label: "Предмет", icon: "BookOpen", hint: "Например: биология, история, математика" },
+  { id: 1, label: "Предмет / дисциплина", icon: "BookOpen", hint: "Например: биология, история, математика" },
   { id: 2, label: "Класс", icon: "Users", hint: "Выберите класс или укажите возраст аудитории" },
-  { id: 3, label: "Тема", icon: "Lightbulb", hint: "Тема конкретного урока" },
-  { id: 4, label: "Цель урока", icon: "Target", hint: "Чего должны достичь ученики по итогам урока" },
-  { id: 5, label: "Задачи урока", icon: "ListChecks", hint: "Конкретные шаги для достижения цели" },
-  { id: 6, label: "План урока", icon: "LayoutList", hint: "Структура и последовательность этапов" },
-  { id: 7, label: "Оценивание", icon: "BarChart3", hint: "Как вы будете оценивать работу учеников" },
+  { id: 3, label: "Тема урока", icon: "Lightbulb", hint: "Тема конкретного урока" },
 ];
 
 const CLASS_OPTIONS = [
@@ -262,16 +258,12 @@ function LessonWizard({ onClose }: { onClose: () => void }) {
     subject: "",
     grade: "",
     topic: "",
-    goal: "",
-    tasks: "",
-    plan: "",
-    evaluation: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [lesson, setLesson] = useState<LessonPlan | null>(null);
 
-  const fields = ["subject","grade","topic","goal","tasks","plan","evaluation"] as const;
+  const fields = ["subject","grade","topic"] as const;
 
   const goTo = (next: number, dir: "next" | "prev") => {
     if (animating) return;
@@ -284,7 +276,7 @@ function LessonWizard({ onClose }: { onClose: () => void }) {
   };
 
   const handleNext = async () => {
-    if (step < 7) { goTo(step + 1, "next"); return; }
+    if (step < 3) { goTo(step + 1, "next"); return; }
     setLoading(true);
     setError("");
     try {
@@ -361,7 +353,7 @@ function LessonWizard({ onClose }: { onClose: () => void }) {
                 <Icon name={current.icon} fallback="BookOpen" size={20} className="text-green" />
               </div>
               <div>
-                <div className="font-body text-xs text-muted-foreground uppercase tracking-wider">Шаг {step} из 7</div>
+                <div className="font-body text-xs text-muted-foreground uppercase tracking-wider">Шаг {step} из 3</div>
                 <div className="font-display text-xl font-semibold text-foreground">{current.label}</div>
               </div>
             </div>
@@ -414,7 +406,7 @@ function LessonWizard({ onClose }: { onClose: () => void }) {
                 onChange={e => setForm(f => ({ ...f, [fieldKey]: e.target.value }))}
                 placeholder={current.hint}
                 autoFocus
-                rows={step >= 5 ? 5 : 3}
+                rows={4}
                 className="w-full px-4 py-3 rounded-xl border border-border bg-warm font-body text-sm focus:outline-none focus:border-green/60 focus:bg-white transition-all placeholder:text-muted-foreground resize-none mb-6"
               />
             )}
@@ -448,7 +440,7 @@ function LessonWizard({ onClose }: { onClose: () => void }) {
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ИИ генерирует урок...
                   </>
-                ) : step === 7 ? (
+                ) : step === 3 ? (
                   <>
                     <Icon name="Sparkles" size={16} />
                     Создать урок
