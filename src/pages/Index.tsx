@@ -299,6 +299,13 @@ function LessonWizard({ onClose }: { onClose: () => void }) {
   };
   const handlePrev = () => { if (step > 1) goTo(step - 1, "prev"); };
 
+  const current = STEPS[step - 1];
+  const fieldKey = fields[step - 1];
+  const progress = (step / 3) * 100;
+  const slideClass = animating
+    ? direction === "next" ? "opacity-0 translate-x-4" : "opacity-0 -translate-x-4"
+    : "opacity-100 translate-x-0";
+
   if (lesson) {
     return <LessonResult lesson={lesson} onClose={onClose} />;
   }
