@@ -29,6 +29,7 @@ def handler(event: dict, context) -> dict:
     subject = body.get('subject', '')
     grade = body.get('grade', '')
     topic = body.get('topic', '')
+    duration = body.get('duration', '45 мин')
     goal = body.get('goal', '')
     tasks = body.get('tasks', '')
     plan = body.get('plan', '')
@@ -41,6 +42,7 @@ def handler(event: dict, context) -> dict:
 - Предмет: {subject}
 - Класс: {grade}
 - Тема урока: {topic}
+- Длительность урока: {duration}
 - Цель урока: {goal}
 - Задачи урока: {tasks}
 - Предварительный план: {plan}
@@ -49,7 +51,7 @@ def handler(event: dict, context) -> dict:
 Сгенерируй детальный план урока в следующем JSON-формате (только JSON, без пояснений):
 {{
   "title": "Название урока",
-  "duration": "45 минут",
+  "duration": "{duration}",
   "overview": "Краткое описание урока (2-3 предложения)",
   "stages": [
     {{
@@ -77,7 +79,7 @@ def handler(event: dict, context) -> dict:
   "tips": ["Совет педагогу 1", "Совет педагогу 2", "Совет педагогу 3"]
 }}
 
-Сделай план живым, практичным и вдохновляющим. Учти возраст учеников ({grade}) и специфику предмета ({subject})."""
+Сделай план живым, практичным и вдохновляющим. Учти возраст учеников ({grade}), специфику предмета ({subject}) и строго укладывайся в {duration}."""
 
     api_key = os.environ.get('HUGGINGFACE_API_KEY', '')
 
