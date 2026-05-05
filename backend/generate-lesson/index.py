@@ -81,7 +81,12 @@ def handler(event: dict, context) -> dict:
 
 Сделай план живым, практичным и вдохновляющим. Учти возраст учеников ({grade}), специфику предмета ({subject}) и строго укладывайся в {duration}."""
 
-    api_key = os.environ.get('HUGGINGFACE_API_KEY', '')
+    api_keys = [
+        os.environ.get('HF_CZMZIXBFNSMAUXQXJHGBOPPPDKBCJMHDTA', ''),
+        os.environ.get('HF_WMVWGJFDIZMEVGKKLOPDYNNKEJSWVKLATC', ''),
+        os.environ.get('SKAITUNNELXL4JLFACOC4NIGGQSXA1VGEBGSAOBMSU', ''),
+        os.environ.get('HUGGINGFACE_API_KEY', ''),
+    ]
 
     request_body = json.dumps({
         'model': MODEL,
@@ -93,18 +98,31 @@ def handler(event: dict, context) -> dict:
         'max_tokens': 2000,
     }).encode('utf-8')
 
-    req = urllib.request.Request(
-        HF_API_URL,
-        data=request_body,
-        headers={
-            'Authorization': f'Bearer {api_key}',
-            'Content-Type': 'application/json',
-        },
-        method='POST'
-    )
+    result = None
+    last_error = None
+    for api_key in api_keys:
+        if not api_key:
+            continue
+        try:
+            req = urllib.request.Request(
+                HF_API_URL,
+                data=request_body,
+                headers={
+                    'Authorization': f'Bearer {api_key}',
+                    'Content-Type': 'application/json',
+                },
+                method='POST'
+            )
+            with urllib.request.urlopen(req, timeout=60) as response:
+                result = json.loads(response.read().decode('utf-8'))
+            break
+        except urllib.error.HTTPError as e:
+            last_error = e
+            if e.code != 401:
+                raise
 
-    with urllib.request.urlopen(req, timeout=60) as response:
-        result = json.loads(response.read().decode('utf-8'))
+    if result is None:
+        raise last_error
 
     content = result['choices'][0]['message']['content']
 
