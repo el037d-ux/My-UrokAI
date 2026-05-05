@@ -5,6 +5,7 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [login, setLogin] = useState({ email: "", password: "" });
   const [reg, setReg] = useState({ lastName: "", firstName: "", middleName: "", phone: "", email: "" });
+  const [agreed, setAgreed] = useState(false);
 
   const switchMode = (m: "login" | "register") => {
     setMode(m);
@@ -143,7 +144,30 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
                   </div>
                 </div>
               </div>
-              <button className="w-full py-3 rounded-xl bg-primary text-white font-body font-medium hover:bg-primary/90 transition-colors">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <div className="relative flex-shrink-0 mt-0.5">
+                  <input
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={e => setAgreed(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${agreed ? "bg-primary border-primary" : "border-border bg-white"}`}>
+                    {agreed && <Icon name="Check" size={10} className="text-white" />}
+                  </div>
+                </div>
+                <span className="font-body text-xs text-muted-foreground leading-relaxed">
+                  Я принимаю{" "}
+                  <a href="/terms" target="_blank" className="text-green hover:underline">пользовательское соглашение</a>
+                  {" "}и{" "}
+                  <a href="/privacy" target="_blank" className="text-green hover:underline">политику конфиденциальности</a>
+                  , а также даю согласие на обработку моих персональных данных
+                </span>
+              </label>
+              <button
+                disabled={!agreed}
+                className="w-full py-3 rounded-xl bg-primary text-white font-body font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Зарегистрироваться
               </button>
               <p className="text-center font-body text-sm text-muted-foreground">

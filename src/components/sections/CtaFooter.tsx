@@ -131,10 +131,10 @@ function Footer() {
           </div>
         </div>
         <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="font-body text-xs text-muted-foreground">© 2024 УрокАИ. Все права защищены.</p>
+          <p className="font-body text-xs text-muted-foreground">© 2025 УрокАИ. Все права защищены.</p>
           <div className="flex gap-4">
-            <a href="#" className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors">Политика конфиденциальности</a>
-            <a href="#" className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors">Условия использования</a>
+            <a href="/privacy" className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors">Политика конфиденциальности</a>
+            <a href="/terms" className="font-body text-xs text-muted-foreground hover:text-foreground transition-colors">Пользовательское соглашение</a>
           </div>
         </div>
       </div>
