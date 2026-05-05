@@ -7,7 +7,7 @@ import re
 
 
 API_URL = "https://api.aitunnel.ru/v1/chat/completions"
-MODEL = "deepseek-v3"
+MODEL = "gpt-4o"
 
 
 def handler(event: dict, context) -> dict:
@@ -82,11 +82,7 @@ def handler(event: dict, context) -> dict:
 Сделай план живым, практичным и вдохновляющим. Учти возраст учеников ({grade}), специфику предмета ({subject}) и строго укладывайся в {duration}."""
 
     api_keys = [
-        os.environ.get('SKAITUNNELR5RWFAX67JH6V17RWWFJVDUPQS2OL2FG', ''),
-        os.environ.get('HUGGINGFACE_API_KEY', ''),
-        os.environ.get('HF_CZMZIXBFNSMAUXQXJHGBOPPPDKBCJMHDTA', ''),
-        os.environ.get('HF_WMVWGJFDIZMEVGKKLOPDYNNKEJSWVKLATC', ''),
-        os.environ.get('SKAITUNNELXL4JLFACOC4NIGGQSXA1VGEBGSAOBMSU', ''),
+        os.environ.get('AITUNNEL_API_KEY', ''),
     ]
 
     request_body = json.dumps({
