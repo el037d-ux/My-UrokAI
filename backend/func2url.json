@@ -1,4 +1,7 @@
 {
+  "user-status": "https://functions.poehali.dev/e173392a-d801-4fb1-8a22-1d4eae8245b0",
+  "auth": "https://functions.poehali.dev/43173cf5-6a15-477a-b57b-72f11019ab4b",
+  "generate-analysis": "https://functions.poehali.dev/a0cc3d7b-8fde-40d8-8f4a-4f526582751f",
   "generate-game": "https://functions.poehali.dev/5626bab5-bf92-4e3d-9994-865dfeda70ec",
   "generate-lesson": "https://functions.poehali.dev/1186dab1-1c68-4be5-95d4-74d1e710571e"
 }

@@ -83,7 +83,7 @@ function Navbar({ onStart, onAuth }: { onStart: () => void; onAuth: () => void }
   );
 }
 
-function Hero({ onStart, onGame }: { onStart: () => void; onGame: () => void }) {
+function Hero({ onStart, onGame, onAnalysis, onPayment }: { onStart: () => void; onGame: () => void; onAnalysis: () => void; onPayment: () => void }) {
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-indigo-light/40 to-teal-light/30 -z-10" />
@@ -121,6 +121,26 @@ function Hero({ onStart, onGame }: { onStart: () => void; onGame: () => void }) 
             >
               <Icon name="Gamepad2" size={16} />
               Придумай игру на урок
+            </button>
+            <button
+              onClick={onAnalysis}
+              className="px-6 py-3 rounded-xl border-2 border-teal text-teal font-body font-semibold hover:bg-teal hover:text-white transition-all active:scale-95 flex items-center gap-2"
+            >
+              <Icon name="FileText" size={16} />
+              Самоанализ урока
+            </button>
+          </div>
+
+          {/* Прейскурант */}
+          <div className="flex flex-wrap gap-3 animate-fade-in-up delay-500">
+            <button onClick={onPayment} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-border shadow-sm hover:border-primary/30 hover:shadow-md transition-all">
+              <span className="w-6 h-6 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+                <Icon name="Crown" size={12} className="text-white" />
+              </span>
+              <div className="text-left">
+                <div className="font-body text-xs font-bold text-foreground">7 дней — 69₽</div>
+                <div className="font-body text-xs text-muted-foreground">30 дней — 260₽</div>
+              </div>
             </button>
           </div>
 

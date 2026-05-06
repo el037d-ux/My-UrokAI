@@ -1,180 +1,95 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
+import { useUser } from "@/context/UserContext";
 
 export default function AuthModal({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<"login" | "register">("login");
-  const [login, setLogin] = useState({ email: "", password: "" });
-  const [reg, setReg] = useState({ lastName: "", firstName: "", middleName: "", phone: "", email: "" });
-  const [agreed, setAgreed] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const { login, register, loading } = useUser();
 
-  const switchMode = (m: "login" | "register") => {
-    setMode(m);
+  const handleSubmit = async () => {
+    setError("");
+    if (!email || !password) { setError("Заполните все поля"); return; }
+    const result = mode === "login"
+      ? await login(email, password)
+      : await register(email, password, name);
+    if (result.ok) {
+      onClose();
+    } else {
+      setError(result.error || "Ошибка");
+    }
   };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-md animate-fade-in-up overflow-hidden"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md animate-fade-in-up overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="px-8 pt-8 pb-6 border-b border-border">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2.5">
-              <span className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white text-xs font-bold font-body">У</span>
+              <span className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/30">
+                <Icon name="GraduationCap" size={16} className="text-white" />
               </span>
-              <span className="font-display text-lg font-semibold text-foreground">УрокАИ</span>
+              <span className="font-display text-lg font-bold text-foreground">УрокАИ</span>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-warm flex items-center justify-center transition-colors">
+            <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-slate flex items-center justify-center transition-colors">
               <Icon name="X" size={16} className="text-muted-foreground" />
             </button>
           </div>
-          {/* Tabs */}
-          <div className="flex gap-1 bg-warm rounded-xl p-1">
-            <button
-              onClick={() => switchMode("login")}
-              className={`flex-1 py-2 rounded-lg font-body text-sm font-medium transition-all ${mode === "login" ? "bg-white shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-            >Войти</button>
-            <button
-              onClick={() => switchMode("register")}
-              className={`flex-1 py-2 rounded-lg font-body text-sm font-medium transition-all ${mode === "register" ? "bg-white shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-            >Регистрация</button>
+          <div className="flex gap-1 bg-slate rounded-xl p-1">
+            {(["login","register"] as const).map(m => (
+              <button key={m} onClick={() => { setMode(m); setError(""); }}
+                className={`flex-1 py-2 rounded-lg font-body text-sm font-semibold transition-all ${mode === m ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              >{m === "login" ? "Войти" : "Регистрация"}</button>
+            ))}
           </div>
         </div>
 
-        {/* Body */}
-        <div className="px-8 py-7">
-          {mode === "login" ? (
-            <div className="space-y-4">
-              <div>
-                <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Логин (Email)</label>
-                <div className="relative">
-                  <Icon name="Mail" size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    type="email"
-                    value={login.email}
-                    onChange={e => setLogin(l => ({ ...l, email: e.target.value }))}
-                    placeholder="ivan@school.ru"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-warm font-body text-sm focus:outline-none focus:border-green/60 focus:bg-white transition-all placeholder:text-muted-foreground"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Пароль</label>
-                <div className="relative">
-                  <Icon name="Lock" size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    type="password"
-                    value={login.password}
-                    onChange={e => setLogin(l => ({ ...l, password: e.target.value }))}
-                    placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-warm font-body text-sm focus:outline-none focus:border-green/60 focus:bg-white transition-all placeholder:text-muted-foreground"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <button className="font-body text-xs text-muted-foreground hover:text-green transition-colors">Забыли пароль?</button>
-              </div>
-              <button className="w-full py-3 rounded-xl bg-primary text-white font-body font-medium hover:bg-primary/90 transition-colors mt-1">
-                Войти
-              </button>
-              <p className="text-center font-body text-sm text-muted-foreground">
-                Нет аккаунта?{" "}
-                <button onClick={() => switchMode("register")} className="text-green font-medium hover:underline">Зарегистрироваться</button>
-              </p>
+        <div className="px-8 py-7 space-y-4">
+          {mode === "register" && (
+            <div>
+              <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Имя</label>
+              <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Иван Иванов"
+                className="w-full px-4 py-2.5 rounded-xl border border-border bg-slate font-body text-sm focus:outline-none focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-muted-foreground" />
             </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Фамилия</label>
-                  <input
-                    type="text"
-                    value={reg.lastName}
-                    onChange={e => setReg(r => ({ ...r, lastName: e.target.value }))}
-                    placeholder="Иванов"
-                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-warm font-body text-sm focus:outline-none focus:border-green/60 focus:bg-white transition-all placeholder:text-muted-foreground"
-                  />
-                </div>
-                <div>
-                  <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Имя</label>
-                  <input
-                    type="text"
-                    value={reg.firstName}
-                    onChange={e => setReg(r => ({ ...r, firstName: e.target.value }))}
-                    placeholder="Иван"
-                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-warm font-body text-sm focus:outline-none focus:border-green/60 focus:bg-white transition-all placeholder:text-muted-foreground"
-                  />
-                </div>
-                <div>
-                  <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Отчество</label>
-                  <input
-                    type="text"
-                    value={reg.middleName}
-                    onChange={e => setReg(r => ({ ...r, middleName: e.target.value }))}
-                    placeholder="Иванович"
-                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-warm font-body text-sm focus:outline-none focus:border-green/60 focus:bg-white transition-all placeholder:text-muted-foreground"
-                  />
-                </div>
-                <div>
-                  <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Телефон</label>
-                  <div className="relative">
-                    <Icon name="Phone" size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      type="tel"
-                      value={reg.phone}
-                      onChange={e => setReg(r => ({ ...r, phone: e.target.value }))}
-                      placeholder="+7 900 000-00-00"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-warm font-body text-sm focus:outline-none focus:border-green/60 focus:bg-white transition-all placeholder:text-muted-foreground"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Адрес электронной почты</label>
-                  <div className="relative">
-                    <Icon name="Mail" size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      type="email"
-                      value={reg.email}
-                      onChange={e => setReg(r => ({ ...r, email: e.target.value }))}
-                      placeholder="ivan@school.ru"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-warm font-body text-sm focus:outline-none focus:border-green/60 focus:bg-white transition-all placeholder:text-muted-foreground"
-                    />
-                  </div>
-                </div>
-              </div>
-              <label className="flex items-start gap-3 cursor-pointer">
-                <div className="relative flex-shrink-0 mt-0.5">
-                  <input
-                    type="checkbox"
-                    checked={agreed}
-                    onChange={e => setAgreed(e.target.checked)}
-                    className="sr-only"
-                  />
-                  <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${agreed ? "bg-primary border-primary" : "border-border bg-white"}`}>
-                    {agreed && <Icon name="Check" size={10} className="text-white" />}
-                  </div>
-                </div>
-                <span className="font-body text-xs text-muted-foreground leading-relaxed">
-                  Я принимаю{" "}
-                  <a href="/terms" target="_blank" className="text-green hover:underline">пользовательское соглашение</a>
-                  {" "}и{" "}
-                  <a href="/privacy" target="_blank" className="text-green hover:underline">политику конфиденциальности</a>
-                  , а также даю согласие на обработку моих персональных данных
-                </span>
-              </label>
-              <button
-                disabled={!agreed}
-                className="w-full py-3 rounded-xl bg-primary text-white font-body font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Зарегистрироваться
-              </button>
-              <p className="text-center font-body text-sm text-muted-foreground">
-                Уже есть аккаунт?{" "}
-                <button onClick={() => switchMode("login")} className="text-green font-medium hover:underline">Войти</button>
-              </p>
+          )}
+          <div>
+            <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Email</label>
+            <div className="relative">
+              <Icon name="Mail" size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="ivan@school.ru"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-slate font-body text-sm focus:outline-none focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-muted-foreground" />
             </div>
+          </div>
+          <div>
+            <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Пароль</label>
+            <div className="relative">
+              <Icon name="Lock" size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••"
+                onKeyDown={e => e.key === "Enter" && handleSubmit()}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-slate font-body text-sm focus:outline-none focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-muted-foreground" />
+            </div>
+          </div>
+
+          {error && (
+            <div className="px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center gap-2">
+              <Icon name="AlertCircle" size={16} className="text-destructive flex-shrink-0" />
+              <span className="font-body text-sm text-destructive">{error}</span>
+            </div>
+          )}
+
+          <button onClick={handleSubmit} disabled={loading}
+            className="w-full py-3 rounded-xl bg-primary text-white font-body font-semibold hover:bg-primary/90 transition-colors shadow-md shadow-primary/25 disabled:opacity-60 flex items-center justify-center gap-2">
+            {loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            {mode === "login" ? "Войти" : "Зарегистрироваться"}
+          </button>
+
+          {mode === "register" && (
+            <p className="font-body text-xs text-muted-foreground text-center">
+              Регистрируясь, вы получаете 3 урока и 3 игры бесплатно
+            </p>
           )}
         </div>
       </div>
