@@ -95,26 +95,26 @@ function LessonResult({ lesson, onClose }: { lesson: LessonPlan; onClose: () => 
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="w-5 h-5 rounded-md bg-green flex items-center justify-center">
+                <span className="w-5 h-5 rounded-md bg-primary flex items-center justify-center">
                   <Icon name="Sparkles" size={12} className="text-white" />
                 </span>
-                <span className="font-body text-xs font-medium text-green uppercase tracking-wider">Урок готов</span>
+                <span className="font-body text-xs font-semibold text-primary uppercase tracking-wider">Урок готов</span>
               </div>
-              <h2 className="font-display text-2xl font-semibold text-foreground leading-tight">{lesson.title}</h2>
+              <h2 className="font-display text-2xl font-bold text-foreground leading-tight">{lesson.title}</h2>
               <p className="font-body text-sm text-muted-foreground mt-1">{lesson.duration} · {lesson.overview}</p>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-warm flex items-center justify-center transition-colors flex-shrink-0">
+            <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-slate flex items-center justify-center transition-colors flex-shrink-0">
               <Icon name="X" size={16} className="text-muted-foreground" />
             </button>
           </div>
           {/* Tabs */}
-          <div className="flex gap-1 mt-5 bg-warm rounded-xl p-1">
+          <div className="flex gap-1 mt-5 bg-slate rounded-xl p-1">
             {([["stages","Этапы урока"],["activities","Активности"],["assessment","Оценивание"]] as const).map(([t, l]) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`flex-1 py-1.5 rounded-lg font-body text-xs font-medium transition-all ${
-                  tab === t ? "bg-white shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                className={`flex-1 py-1.5 rounded-lg font-body text-xs font-semibold transition-all ${
+                  tab === t ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >{l}</button>
             ))}
@@ -136,18 +136,18 @@ function LessonResult({ lesson, onClose }: { lesson: LessonPlan; onClose: () => 
                 </div>
                 <p className="font-body text-sm text-muted-foreground leading-relaxed mb-1.5">{s.description}</p>
                 <div className="flex flex-wrap gap-2">
-                  {s.method && <span className="px-2 py-0.5 rounded-full bg-green-light text-green font-body text-xs">📋 {s.method}</span>}
-                  {s.materials && <span className="px-2 py-0.5 rounded-full bg-[hsl(38,50%,92%)] text-[hsl(38,50%,35%)] font-body text-xs">🎒 {s.materials}</span>}
+                  {s.method && <span className="px-2 py-0.5 rounded-full bg-indigo-light text-primary font-body text-xs">📋 {s.method}</span>}
+                  {s.materials && <span className="px-2 py-0.5 rounded-full bg-amber-light text-amber font-body text-xs">🎒 {s.materials}</span>}
                 </div>
               </div>
             </div>
           ))}
 
           {tab === "activities" && lesson.activities.map((a, i) => (
-            <div key={i} className="p-4 rounded-2xl border border-border hover:border-green/30 transition-colors">
+            <div key={i} className="p-4 rounded-2xl border border-border hover:border-primary/25 transition-colors">
               <div className="flex items-center gap-2 mb-2">
-                <span className="px-2 py-0.5 rounded-full bg-green-light text-green font-body text-xs">{a.type}</span>
-                <span className="px-2 py-0.5 rounded-full bg-warm text-muted-foreground font-body text-xs">{a.duration}</span>
+                <span className="px-2 py-0.5 rounded-full badge-indigo font-body text-xs">{a.type}</span>
+                <span className="px-2 py-0.5 rounded-full bg-slate text-muted-foreground font-body text-xs">{a.duration}</span>
               </div>
               <div className="font-body font-semibold text-foreground text-sm mb-1">{a.title}</div>
               <p className="font-body text-sm text-muted-foreground leading-relaxed">{a.description}</p>
@@ -160,8 +160,8 @@ function LessonResult({ lesson, onClose }: { lesson: LessonPlan; onClose: () => 
                 <div className="font-body text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Методы оценивания</div>
                 <div className="flex flex-wrap gap-2">
                   {lesson.assessment.methods.map((m, i) => (
-                    <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-warm border border-border">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green flex-shrink-0" />
+                    <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-light border border-indigo-mid">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
                       <span className="font-body text-sm text-foreground">{m}</span>
                     </div>
                   ))}
@@ -201,19 +201,19 @@ function LessonResult({ lesson, onClose }: { lesson: LessonPlan; onClose: () => 
         {(lesson.homework || (lesson.tips && lesson.tips.length > 0)) && (
           <div className="px-8 pb-5 flex-shrink-0 space-y-3">
             {lesson.homework && (
-              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[hsl(38,50%,93%)]">
-                <Icon name="BookOpen" size={16} className="text-[hsl(38,60%,40%)] flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-light border border-amber-mid">
+                <Icon name="BookOpen" size={16} className="text-amber flex-shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-body text-xs font-semibold text-[hsl(38,60%,40%)] uppercase tracking-wider">Домашнее задание</span>
+                  <span className="font-body text-xs font-semibold text-amber uppercase tracking-wider">Домашнее задание</span>
                   <p className="font-body text-sm text-foreground mt-0.5">{lesson.homework}</p>
                 </div>
               </div>
             )}
             {lesson.tips && lesson.tips.length > 0 && (
-              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-green-light">
-                <Icon name="Lightbulb" size={16} className="text-green flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-indigo-light border border-indigo-mid">
+                <Icon name="Lightbulb" size={16} className="text-primary flex-shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-body text-xs font-semibold text-green uppercase tracking-wider">Советы педагогу</span>
+                  <span className="font-body text-xs font-semibold text-primary uppercase tracking-wider">Советы педагогу</span>
                   <ul className="mt-1 space-y-0.5">
                     {lesson.tips.map((t, i) => <li key={i} className="font-body text-xs text-foreground">• {t}</li>)}
                   </ul>
@@ -298,21 +298,21 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
         <div className="px-8 pt-8 pb-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2.5">
-              <span className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white text-xs font-bold font-body">У</span>
+              <span className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/30">
+                <Icon name="GraduationCap" size={16} className="text-white" />
               </span>
-              <span className="font-display text-lg font-semibold text-foreground">Создание урока</span>
+              <span className="font-display text-lg font-bold text-foreground">Создание урока</span>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-warm flex items-center justify-center transition-colors">
+            <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-slate flex items-center justify-center transition-colors">
               <Icon name="X" size={16} className="text-muted-foreground" />
             </button>
           </div>
 
           {/* Progress bar */}
           <div className="relative">
-            <div className="h-1.5 bg-warm rounded-full overflow-hidden">
+            <div className="h-2 bg-slate rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-green to-[hsl(158,45%,60%)] rounded-full transition-all duration-500 ease-out"
+                className="h-full bg-gradient-to-r from-primary to-teal rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -322,7 +322,7 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
                   key={s.id}
                   onClick={() => goTo(s.id, s.id > step ? "next" : "prev")}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    s.id < step ? "bg-green" : s.id === step ? "bg-green scale-125" : "bg-warm-mid"
+                    s.id < step ? "bg-primary" : s.id === step ? "bg-primary scale-150" : "bg-slate-mid"
                   }`}
                 />
               ))}
@@ -334,8 +334,8 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
         <div className="px-8 pb-8">
           <div className={`transition-all duration-200 ease-out ${slideClass}`}>
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-green-light flex items-center justify-center">
-                <Icon name={current.icon} fallback="BookOpen" size={20} className="text-green" />
+              <div className="w-10 h-10 rounded-xl bg-indigo-light flex items-center justify-center">
+                <Icon name={current.icon} fallback="BookOpen" size={20} className="text-primary" />
               </div>
               <div>
                 <div className="font-body text-xs text-muted-foreground uppercase tracking-wider">Шаг {step} из 4</div>
@@ -351,8 +351,8 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
                     onClick={() => setForm(f => ({ ...f, duration: d }))}
                     className={`flex-1 py-4 rounded-xl text-base font-body font-semibold border transition-all ${
                       form.duration === d
-                        ? "bg-primary text-white border-primary"
-                        : "bg-white text-foreground border-border hover:border-green/40 hover:bg-green-light"
+                        ? "bg-primary text-white border-primary shadow-md shadow-primary/25"
+                        : "bg-white text-foreground border-border hover:border-primary/30 hover:bg-indigo-light"
                     }`}
                   >
                     {d}
@@ -367,8 +367,8 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
                     onClick={() => setForm(f => ({ ...f, grade: cls }))}
                     className={`px-3 py-2.5 rounded-xl text-sm font-body font-medium border transition-all ${
                       form.grade === cls
-                        ? "bg-primary text-white border-primary"
-                        : "bg-white text-foreground border-border hover:border-green/40 hover:bg-green-light"
+                        ? "bg-primary text-white border-primary shadow-sm shadow-primary/20"
+                        : "bg-white text-foreground border-border hover:border-primary/30 hover:bg-indigo-light"
                     }`}
                   >
                     {cls}
@@ -383,7 +383,7 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
                   onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
                   placeholder={current.hint}
                   autoFocus
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-warm font-body text-sm focus:outline-none focus:border-green/60 focus:bg-white transition-all placeholder:text-muted-foreground"
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-slate font-body text-sm focus:outline-none focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-muted-foreground"
                 />
                 <div className="flex flex-wrap gap-2 mt-3">
                   {["Биология","История","Математика","Русский язык","Физика","Химия","Литература","География"].map(s => (
@@ -393,7 +393,7 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
                       className={`px-3 py-1.5 rounded-full text-xs font-body border transition-all ${
                         form.subject === s
                           ? "bg-primary text-white border-primary"
-                          : "bg-white border-border text-muted-foreground hover:border-green/40 hover:text-foreground"
+                          : "bg-white border-border text-muted-foreground hover:border-primary/30 hover:text-foreground hover:bg-indigo-light"
                       }`}
                     >
                       {s}
@@ -408,7 +408,7 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
                 placeholder={current.hint}
                 autoFocus
                 rows={4}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-warm font-body text-sm focus:outline-none focus:border-green/60 focus:bg-white transition-all placeholder:text-muted-foreground resize-none mb-6"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-slate font-body text-sm focus:outline-none focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-muted-foreground resize-none mb-6"
               />
             )}
 
@@ -425,7 +425,7 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
               {step > 1 && !loading && (
                 <button
                   onClick={handlePrev}
-                  className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border font-body text-sm font-medium text-foreground hover:bg-warm transition-colors"
+                  className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border font-body text-sm font-medium text-foreground hover:bg-slate transition-colors"
                 >
                   <Icon name="ChevronLeft" size={16} />
                   Назад
@@ -434,7 +434,7 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
               <button
                 onClick={handleNext}
                 disabled={loading}
-                className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-body text-sm font-medium hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-body text-sm font-semibold hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed shadow-md shadow-primary/25"
               >
                 {loading ? (
                   <>

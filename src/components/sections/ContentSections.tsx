@@ -59,18 +59,24 @@ const FAQ_ITEMS = [
 const ARTICLES = [
   {
     tag: "Методика",
+    tagColor: "badge-indigo",
+    accentColor: "from-primary to-indigo-mid",
     title: "5 техник активного обучения, которые работают в любом классе",
     desc: "Как превратить пассивных слушателей в участников урока с помощью простых приёмов.",
     time: "5 мин",
   },
   {
     tag: "Оценивание",
+    tagColor: "badge-amber",
+    accentColor: "from-amber to-amber-mid",
     title: "Формативное оценивание без стресса: инструменты и примеры",
     desc: "Как регулярно проверять знания учеников так, чтобы это помогало, а не пугало.",
     time: "7 мин",
   },
   {
     tag: "Технологии",
+    tagColor: "badge-indigo",
+    accentColor: "from-teal to-teal-light",
     title: "Google Classroom + ИИ: как сократить подготовку урока вдвое",
     desc: "Пошаговое руководство по интеграции ИИ-помощника в привычный рабочий процесс.",
     time: "4 мин",
@@ -78,12 +84,12 @@ const ARTICLES = [
 ];
 
 const FEATURES = [
-  { icon: "Lightbulb", title: "Идеи и активности", desc: "ИИ предлагает конкретные упражнения, игры и задания с учётом возраста и предмета" },
-  { icon: "BarChart3", title: "Методы оценивания", desc: "Получите готовые критерии оценки, рубрики и форматы проверки знаний" },
-  { icon: "Puzzle", title: "Интеграции", desc: "Экспорт в Google Classroom, Microsoft Teams и другие платформы в один клик" },
-  { icon: "BookOpen", title: "Библиотека уроков", desc: "Сохраняйте, редактируйте и делитесь уроками с коллегами" },
-  { icon: "Users", title: "Адаптация под класс", desc: "Укажите особенности аудитории — ИИ настроит подачу материала" },
-  { icon: "Clock", title: "Экономия времени", desc: "Подготовка урока занимает 5 минут вместо нескольких часов" },
+  { icon: "Lightbulb", title: "Идеи и активности", desc: "ИИ предлагает конкретные упражнения, игры и задания с учётом возраста и предмета", color: "bg-amber-light text-amber" },
+  { icon: "BarChart3", title: "Методы оценивания", desc: "Получите готовые критерии оценки, рубрики и форматы проверки знаний", color: "bg-indigo-light text-primary" },
+  { icon: "Puzzle", title: "Интеграции", desc: "Экспорт в Google Classroom, Microsoft Teams и другие платформы в один клик", color: "bg-teal-light text-teal" },
+  { icon: "BookOpen", title: "Библиотека уроков", desc: "Сохраняйте, редактируйте и делитесь уроками с коллегами", color: "bg-amber-light text-amber" },
+  { icon: "Users", title: "Адаптация под класс", desc: "Укажите особенности аудитории — ИИ настроит подачу материала", color: "bg-indigo-light text-primary" },
+  { icon: "Clock", title: "Экономия времени", desc: "Подготовка урока занимает 5 минут вместо нескольких часов", color: "bg-teal-light text-teal" },
 ];
 
 function About() {
@@ -91,10 +97,10 @@ function About() {
     <section id="about" className="py-24 bg-white">
       <div className="container max-w-6xl mx-auto px-6">
         <div className="section-fade text-center mb-16">
-          <span className="font-body text-sm font-medium text-green uppercase tracking-wider">О сервисе</span>
-          <h2 className="font-display text-4xl lg:text-5xl font-semibold mt-3 mb-5 text-foreground">
+          <span className="inline-block px-3 py-1 rounded-full badge-indigo text-xs font-body font-semibold uppercase tracking-wider mb-4">О сервисе</span>
+          <h2 className="font-display text-4xl lg:text-5xl font-bold mt-3 mb-5 text-foreground">
             Всё необходимое для{" "}
-            <em className="not-italic text-green">современного урока</em>
+            <span className="gradient-text">современного урока</span>
           </h2>
           <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
             УрокАИ — это интеллектуальный ассистент, который понимает специфику педагогической работы и помогает создавать вовлекающие уроки.
@@ -105,11 +111,11 @@ function About() {
           {FEATURES.map((f, i) => (
             <div
               key={f.title}
-              className="section-fade group p-6 rounded-2xl border border-border hover:border-green/30 hover:shadow-lg hover:shadow-green/5 transition-all duration-300 bg-white"
+              className="section-fade group p-6 rounded-2xl border border-border hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 bg-white"
               style={{ transitionDelay: `${i * 80}ms` }}
             >
-              <div className="w-10 h-10 rounded-xl bg-warm group-hover:bg-green-light transition-colors flex items-center justify-center mb-4">
-                <Icon name={f.icon} fallback="Lightbulb" size={20} className="text-foreground group-hover:text-green transition-colors" />
+              <div className={`w-11 h-11 rounded-xl ${f.color} flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-200`}>
+                <Icon name={f.icon} fallback="Lightbulb" size={20} />
               </div>
               <h3 className="font-body font-semibold text-foreground mb-2">{f.title}</h3>
               <p className="font-body text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
@@ -117,11 +123,11 @@ function About() {
           ))}
         </div>
 
-        <div className="section-fade mt-16 rounded-2xl overflow-hidden bg-warm relative">
+        <div className="section-fade mt-16 rounded-2xl overflow-hidden bg-slate relative">
           <div className="grid lg:grid-cols-2 gap-0">
             <div className="p-10 lg:p-14">
-              <span className="font-body text-xs font-medium text-green uppercase tracking-wider">Интеграции</span>
-              <h3 className="font-display text-3xl font-semibold mt-3 mb-4 text-foreground">
+              <span className="inline-block px-3 py-1 rounded-full badge-amber text-xs font-body font-semibold uppercase tracking-wider mb-4">Интеграции</span>
+              <h3 className="font-display text-3xl font-bold mt-3 mb-4 text-foreground">
                 Работает с вашими любимыми платформами
               </h3>
               <p className="font-body text-muted-foreground mb-6 leading-relaxed">
@@ -129,7 +135,7 @@ function About() {
               </p>
               <div className="flex flex-wrap gap-3">
                 {["Google Classroom", "Microsoft Teams", "Moodle", "Edmodo"].map((p) => (
-                  <span key={p} className="px-3 py-1.5 rounded-full bg-white border border-border font-body text-sm font-medium text-foreground">
+                  <span key={p} className="px-3 py-1.5 rounded-full bg-white border border-border font-body text-sm font-medium text-foreground shadow-sm">
                     {p}
                   </span>
                 ))}
@@ -141,7 +147,7 @@ function About() {
                 alt="Интеграции с платформами"
                 className="w-full h-full object-cover min-h-[280px]"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-warm/80 to-transparent lg:from-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate/80 to-transparent lg:from-transparent" />
             </div>
           </div>
         </div>
@@ -176,11 +182,11 @@ function ChatDemo() {
   }, [visibleMessages]);
 
   return (
-    <section id="demo" className="py-24 bg-[hsl(220,15%,97%)]">
+    <section id="demo" className="py-24 bg-background">
       <div className="container max-w-6xl mx-auto px-6">
         <div className="section-fade text-center mb-16">
-          <span className="font-body text-sm font-medium text-green uppercase tracking-wider">Примеры работы</span>
-          <h2 className="font-display text-4xl lg:text-5xl font-semibold mt-3 mb-5 text-foreground">
+          <span className="inline-block px-3 py-1 rounded-full badge-amber text-xs font-body font-semibold uppercase tracking-wider mb-4">Примеры работы</span>
+          <h2 className="font-display text-4xl lg:text-5xl font-bold mt-3 mb-5 text-foreground">
             Посмотрите, как это работает
           </h2>
           <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -189,38 +195,38 @@ function ChatDemo() {
         </div>
 
         <div className="section-fade max-w-2xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-xl shadow-foreground/5 border border-border overflow-hidden">
-            <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-green flex items-center justify-center">
-                <Icon name="Bot" size={16} className="text-white" />
+          <div className="bg-white rounded-2xl shadow-xl shadow-primary/8 border border-border overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex items-center gap-3 bg-slate/50">
+              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-sm">
+                <Icon name="GraduationCap" size={16} className="text-white" />
               </div>
               <div>
-                <div className="font-body text-sm font-semibold text-foreground">УрокАИ</div>
-                <div className="font-body text-xs text-green flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green inline-block" />
+                <p className="font-body text-sm font-semibold text-foreground">УрокАИ</p>
+                <div className="flex items-center gap-1.5 font-body text-xs text-teal">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal inline-block animate-pulse-soft" />
                   Онлайн
                 </div>
               </div>
               <div className="ml-auto flex gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-[hsl(0,70%,75%)]" />
-                <span className="w-3 h-3 rounded-full bg-[hsl(38,70%,75%)]" />
-                <span className="w-3 h-3 rounded-full bg-[hsl(120,50%,65%)]" />
+                <span className="w-3 h-3 rounded-full bg-amber-mid" />
+                <span className="w-3 h-3 rounded-full bg-teal-light" />
               </div>
             </div>
 
             <div ref={chatRef} className="h-[400px] overflow-y-auto p-6 space-y-4 scroll-smooth">
               {!isStarted && (
                 <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-warm flex items-center justify-center">
-                    <Icon name="MessageCircle" size={28} className="text-muted-foreground" />
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-light flex items-center justify-center">
+                    <Icon name="MessageCircle" size={28} className="text-primary" />
                   </div>
                   <div>
-                    <p className="font-body font-medium text-foreground mb-1">Демо-диалог с УрокАИ</p>
+                    <p className="font-body font-semibold text-foreground mb-1">Демо-диалог с УрокАИ</p>
                     <p className="font-body text-sm text-muted-foreground">Нажмите, чтобы увидеть пример работы</p>
                   </div>
                   <button
                     onClick={startDemo}
-                    className="px-5 py-2.5 rounded-xl bg-primary text-white font-body text-sm font-medium hover:bg-primary/90 transition-colors"
+                    className="px-5 py-2.5 rounded-xl bg-primary text-white font-body text-sm font-semibold hover:bg-primary/90 transition-colors shadow-md shadow-primary/25"
                   >
                     Запустить демо
                   </button>
@@ -233,7 +239,7 @@ function ChatDemo() {
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in-up`}
                 >
                   {msg.role === "bot" && (
-                    <div className="w-7 h-7 rounded-full bg-green flex-shrink-0 flex items-center justify-center mr-2 mt-0.5">
+                    <div className="w-7 h-7 rounded-full bg-primary flex-shrink-0 flex items-center justify-center mr-2 mt-0.5">
                       <Icon name="Bot" size={14} className="text-white" />
                     </div>
                   )}
@@ -241,7 +247,7 @@ function ChatDemo() {
                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                       msg.role === "user"
                         ? "bg-primary text-white rounded-tr-sm"
-                        : "bg-warm text-foreground rounded-tl-sm"
+                        : "bg-slate text-foreground rounded-tl-sm"
                     }`}
                   >
                     <p className="font-body text-sm leading-relaxed">{msg.text}</p>
@@ -258,10 +264,10 @@ function ChatDemo() {
 
               {isStarted && visibleMessages < DEMO_CHAT.length && visibleMessages % 2 === 1 && (
                 <div className="flex justify-start animate-fade-in">
-                  <div className="w-7 h-7 rounded-full bg-green flex-shrink-0 flex items-center justify-center mr-2">
+                  <div className="w-7 h-7 rounded-full bg-primary flex-shrink-0 flex items-center justify-center mr-2">
                     <Icon name="Bot" size={14} className="text-white" />
                   </div>
-                  <div className="bg-warm rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+                  <div className="bg-slate rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "150ms" }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -283,8 +289,8 @@ function FAQ() {
     <section id="faq" className="py-24 bg-white">
       <div className="container max-w-3xl mx-auto px-6">
         <div className="section-fade text-center mb-16">
-          <span className="font-body text-sm font-medium text-green uppercase tracking-wider">Вопросы и ответы</span>
-          <h2 className="font-display text-4xl lg:text-5xl font-semibold mt-3 mb-5 text-foreground">
+          <span className="inline-block px-3 py-1 rounded-full badge-indigo text-xs font-body font-semibold uppercase tracking-wider mb-4">Вопросы и ответы</span>
+          <h2 className="font-display text-4xl lg:text-5xl font-bold mt-3 mb-5 text-foreground">
             Частые вопросы
           </h2>
           <p className="font-body text-lg text-muted-foreground">
@@ -296,21 +302,21 @@ function FAQ() {
           {FAQ_ITEMS.map((item, i) => (
             <div
               key={i}
-              className="border border-border rounded-xl overflow-hidden hover:border-green/30 transition-colors"
+              className={`border rounded-xl overflow-hidden transition-all duration-200 ${
+                open === i ? "border-primary/30 shadow-md shadow-primary/8" : "border-border hover:border-primary/20"
+              }`}
             >
               <button
-                className="w-full px-6 py-5 flex items-center justify-between gap-4 text-left hover:bg-warm/50 transition-colors"
+                className="w-full px-6 py-5 flex items-center justify-between gap-4 text-left hover:bg-slate/50 transition-colors"
                 onClick={() => setOpen(open === i ? null : i)}
               >
                 <span className="font-body font-medium text-foreground text-sm leading-relaxed">{item.q}</span>
-                <Icon
-                  name={open === i ? "ChevronUp" : "ChevronDown"}
-                  size={18}
-                  className="text-muted-foreground flex-shrink-0"
-                />
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${open === i ? "bg-primary text-white" : "bg-slate text-muted-foreground"}`}>
+                  <Icon name={open === i ? "ChevronUp" : "ChevronDown"} size={14} />
+                </span>
               </button>
               {open === i && (
-                <div className="px-6 pb-5 animate-fade-in">
+                <div className="px-6 pb-5 animate-fade-in border-t border-border/50 pt-4">
                   <p className="font-body text-sm text-muted-foreground leading-relaxed">{item.a}</p>
                 </div>
               )}
@@ -324,16 +330,16 @@ function FAQ() {
 
 function Articles() {
   return (
-    <section id="articles" className="py-24 bg-warm">
+    <section id="articles" className="py-24 bg-background">
       <div className="container max-w-6xl mx-auto px-6">
         <div className="section-fade flex items-end justify-between mb-12">
           <div>
-            <span className="font-body text-sm font-medium text-green uppercase tracking-wider">Блог</span>
-            <h2 className="font-display text-4xl lg:text-5xl font-semibold mt-3 text-foreground">
+            <span className="inline-block px-3 py-1 rounded-full badge-amber text-xs font-body font-semibold uppercase tracking-wider mb-4">Блог</span>
+            <h2 className="font-display text-4xl lg:text-5xl font-bold mt-3 text-foreground">
               Статьи и советы
             </h2>
           </div>
-          <a href="#" className="hidden md:flex items-center gap-1.5 font-body text-sm font-medium text-foreground hover:text-green transition-colors">
+          <a href="#" className="hidden md:flex items-center gap-1.5 font-body text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
             Все статьи
             <Icon name="ArrowRight" size={16} />
           </a>
@@ -343,15 +349,15 @@ function Articles() {
           {ARTICLES.map((a, i) => (
             <div
               key={i}
-              className="section-fade group bg-white rounded-2xl overflow-hidden border border-border hover:shadow-xl hover:shadow-foreground/5 transition-all duration-300 cursor-pointer"
+              className="section-fade group bg-white rounded-2xl overflow-hidden border border-border hover:shadow-xl hover:shadow-primary/8 transition-all duration-300 cursor-pointer"
               style={{ transitionDelay: `${i * 100}ms` }}
             >
-              <div className="h-2 bg-gradient-to-r from-green to-[hsl(158,45%,60%)] group-hover:h-3 transition-all duration-300" />
+              <div className={`h-1.5 bg-gradient-to-r ${a.accentColor} group-hover:h-2 transition-all duration-300`} />
               <div className="p-6">
-                <span className="inline-block px-2.5 py-1 rounded-full bg-green-light text-green text-xs font-body font-medium mb-4">
+                <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-body font-semibold mb-4 ${a.tagColor}`}>
                   {a.tag}
                 </span>
-                <h3 className="font-body font-semibold text-foreground mb-2 leading-snug group-hover:text-green transition-colors">
+                <h3 className="font-body font-semibold text-foreground mb-2 leading-snug group-hover:text-primary transition-colors">
                   {a.title}
                 </h3>
                 <p className="font-body text-sm text-muted-foreground leading-relaxed mb-4">{a.desc}</p>

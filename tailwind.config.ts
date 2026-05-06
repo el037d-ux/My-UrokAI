@@ -19,8 +19,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				display: ['Cormorant', 'serif'],
-				body: ['Golos Text', 'sans-serif'],
+				display: ['Nunito', 'Golos Text', 'sans-serif'],
+				body: ['Inter', 'Golos Text', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -56,13 +56,31 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				indigo: {
+					DEFAULT: 'hsl(var(--indigo))',
+					light: 'hsl(var(--indigo-light))',
+					mid: 'hsl(var(--indigo-mid))',
+				},
+				amber: {
+					DEFAULT: 'hsl(var(--amber))',
+					light: 'hsl(var(--amber-light))',
+					mid: 'hsl(var(--amber-mid))',
+				},
+				teal: {
+					DEFAULT: 'hsl(var(--teal))',
+					light: 'hsl(var(--teal-light))',
+				},
+				slate: {
+					DEFAULT: 'hsl(var(--slate))',
+					mid: 'hsl(var(--slate-mid))',
+				},
 				green: {
-					DEFAULT: 'hsl(var(--green))',
-					light: 'hsl(var(--green-light))',
+					DEFAULT: 'hsl(var(--teal))',
+					light: 'hsl(var(--teal-light))',
 				},
 				warm: {
-					DEFAULT: 'hsl(var(--warm))',
-					mid: 'hsl(var(--warm-mid))',
+					DEFAULT: 'hsl(var(--slate))',
+					mid: 'hsl(var(--slate-mid))',
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
