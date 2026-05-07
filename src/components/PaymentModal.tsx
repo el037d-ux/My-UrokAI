@@ -100,7 +100,7 @@ export default function PaymentModal({ onClose }: { onClose: () => void }) {
                   />
                 </div>
 
-                <div className="text-xs font-body text-muted-foreground text-center">После оплаты напишите нам в поддержку — активируем подписку</div>
+
               </div>
             </div>
           ))}
