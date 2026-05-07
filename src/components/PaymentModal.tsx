@@ -99,10 +99,7 @@ export default function PaymentModal({ onClose }: { onClose: () => void }) {
                     className="w-[180px] h-[180px]"
                   />
                 </div>
-                <div className="flex items-center gap-2 text-xs font-body text-muted-foreground">
-                  <Icon name="Phone" size={13} />
-                  Или переведите на номер СБП: <span className="font-semibold text-foreground">+7 908 328-73-09</span>
-                </div>
+
                 <div className="text-xs font-body text-muted-foreground text-center">После оплаты напишите нам в поддержку — активируем подписку</div>
               </div>
             </div>
