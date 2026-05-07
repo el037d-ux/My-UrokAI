@@ -372,8 +372,8 @@ export default function GameWizard({ onClose }: { onClose: () => void }) {
             {step === 1 && (
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Предмет</label>
-                  <div className="flex flex-wrap gap-2">
+                  <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Предмет / Дисциплина</label>
+                  <div className="flex flex-wrap gap-2 mb-2">
                     {SUBJECTS.map(s => (
                       <button key={s} onClick={() => setForm(f => ({ ...f, subject: s }))}
                         className={`px-3 py-1.5 rounded-full text-xs font-body border transition-all ${form.subject === s ? "bg-amber text-white border-amber" : "bg-white border-border text-muted-foreground hover:border-amber/40 hover:bg-amber-light"}`}>
@@ -381,6 +381,13 @@ export default function GameWizard({ onClose }: { onClose: () => void }) {
                       </button>
                     ))}
                   </div>
+                  <input
+                    type="text"
+                    value={form.subject}
+                    onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
+                    placeholder="Или введите свой предмет..."
+                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-slate font-body text-sm focus:outline-none focus:border-amber/40 focus:bg-white focus:ring-2 focus:ring-amber/10 transition-all placeholder:text-muted-foreground"
+                  />
                 </div>
                 <div>
                   <label className="font-body text-sm font-medium text-foreground mb-1.5 block">Класс</label>
