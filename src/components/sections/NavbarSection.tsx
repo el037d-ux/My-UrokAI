@@ -17,7 +17,6 @@ function Navbar({ onStart, onAuth, onPayment }: { onStart: () => void; onAuth: (
     { href: "#about", label: "О сервисе" },
     { href: "#demo", label: "Примеры" },
     { href: "#faq", label: "Вопросы" },
-    { href: "#articles", label: "Статьи" },
     { href: "#contacts", label: "Контакты" },
   ];
 
