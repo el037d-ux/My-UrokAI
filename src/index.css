@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 25% 14%;
 
-    --primary: 243 75% 59%;
+    --primary: 142 70% 38%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 20% 96%;
@@ -30,23 +30,23 @@
 
     --border: 220 15% 90%;
     --input: 220 15% 90%;
-    --ring: 243 75% 59%;
+    --ring: 142 70% 38%;
 
     --radius: 0.875rem;
 
     --sidebar-background: 210 20% 98%;
     --sidebar-foreground: 220 25% 14%;
-    --sidebar-primary: 243 75% 59%;
+    --sidebar-primary: 142 70% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 20% 96%;
     --sidebar-accent-foreground: 220 25% 14%;
     --sidebar-border: 220 15% 90%;
-    --sidebar-ring: 243 75% 59%;
+    --sidebar-ring: 142 70% 38%;
 
     /* custom */
-    --indigo: 243 75% 59%;
-    --indigo-light: 243 75% 96%;
-    --indigo-mid: 243 60% 88%;
+    --indigo: 142 70% 38%;
+    --indigo-light: 142 60% 95%;
+    --indigo-mid: 142 50% 85%;
     --amber: 38 95% 54%;
     --amber-light: 38 95% 95%;
     --amber-mid: 38 80% 85%;
