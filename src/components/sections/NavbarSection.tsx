@@ -3,7 +3,7 @@ import Icon from "@/components/ui/icon";
 
 const HERO_IMAGE = "https://cdn.poehali.dev/projects/3a27d5a9-016a-43ab-946d-4c4fe8129705/bucket/fb741ecb-cd4a-4766-ba6b-9c590c24dfe7.png";
 
-function Navbar({ onStart, onAuth }: { onStart: () => void; onAuth: () => void }) {
+function Navbar({ onStart, onAuth, onPayment }: { onStart: () => void; onAuth: () => void; onPayment: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -48,6 +48,10 @@ function Navbar({ onStart, onAuth }: { onStart: () => void; onAuth: () => void }
         </div>
 
         <div className="hidden md:flex items-center gap-3">
+          <button onClick={onPayment} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-sm font-body font-semibold text-primary hover:border-primary/40 hover:bg-primary/5 transition-all">
+            <Icon name="Crown" size={14} className="text-primary" />
+            Тарифы
+          </button>
           <button onClick={onAuth} className="text-sm font-body font-medium text-foreground hover:text-primary transition-colors px-3 py-2">
             Войти
           </button>
@@ -74,6 +78,9 @@ function Navbar({ onStart, onAuth }: { onStart: () => void; onAuth: () => void }
             </a>
           ))}
           <div className="pt-2 space-y-2">
+            <button onClick={onPayment} className="w-full py-2.5 text-sm font-body font-semibold border border-primary/30 text-primary rounded-xl flex items-center justify-center gap-2">
+              <Icon name="Crown" size={14} />Тарифы
+            </button>
             <button onClick={onAuth} className="w-full py-2.5 text-sm font-body font-medium border border-border rounded-xl">Войти</button>
             <button onClick={onStart} className="w-full py-2.5 text-sm font-body font-semibold bg-primary text-white rounded-xl">Начать бесплатно</button>
           </div>
@@ -108,8 +115,8 @@ function Hero({ onStart, onGame, onAnalysis, onPayment, lessonsLeft, gamesLeft, 
             Опишите тему, возраст учеников и предмет — УрокАИ предложит идеи активностей, методы оценивания и готовый план урока за секунды.
           </p>
 
-          {/* Три главные кнопки */}
-          <div className="grid sm:grid-cols-3 gap-3 mb-6 animate-fade-in-up delay-300">
+          {/* Две главные кнопки */}
+          <div className="grid sm:grid-cols-2 gap-3 mb-6 animate-fade-in-up delay-300">
             {/* Генератор урока */}
             <button
               onClick={onStart}
@@ -144,29 +151,6 @@ function Hero({ onStart, onGame, onAnalysis, onPayment, lessonsLeft, gamesLeft, 
               {isPaid && <span className="text-xs font-body font-normal opacity-70">Безлимитно</span>}
             </button>
 
-            {/* Тарифы */}
-            <button
-              onClick={onPayment}
-              className="flex flex-col items-center gap-2 px-4 py-4 rounded-2xl bg-white border-2 border-primary/20 text-foreground font-body font-semibold hover:border-primary/50 hover:shadow-lg transition-all active:scale-95 group"
-            >
-              <span className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <Icon name="Crown" size={20} className="text-primary" />
-              </span>
-              <span className="text-sm font-bold text-primary">Тарифы</span>
-              <span className="text-xs font-body font-normal text-muted-foreground">7 дней — 69₽</span>
-            </button>
-          </div>
-
-          {/* Самоанализ — под кнопками */}
-          <div className="mb-8 animate-fade-in-up delay-400">
-            <button
-              onClick={onAnalysis}
-              className="flex items-center gap-3 px-5 py-3 rounded-xl border-2 border-teal/40 bg-teal-light text-teal font-body font-semibold hover:border-teal hover:bg-teal hover:text-white transition-all active:scale-95 w-full sm:w-auto"
-            >
-              <Icon name="FileText" size={18} />
-              <span>Самоанализ урока</span>
-              <span className="ml-auto text-xs font-normal opacity-70 bg-teal/10 hover:bg-white/20 px-2 py-0.5 rounded-full">только для подписчиков</span>
-            </button>
           </div>
 
           <div className="flex flex-wrap gap-6 animate-fade-in-up delay-500">
