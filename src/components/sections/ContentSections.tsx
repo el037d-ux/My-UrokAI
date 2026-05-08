@@ -112,12 +112,17 @@ function About() {
 
 type Message = { role: "user" | "bot"; text: string };
 
+const MAX_MESSAGES = 8;
+
 function ChatDemo() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const userMessageCount = messages.filter((m) => m.role === "user").length;
+  const isLimitReached = userMessageCount >= MAX_MESSAGES;
 
   useEffect(() => {
     if (chatRef.current) {
@@ -127,7 +132,7 @@ function ChatDemo() {
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || loading) return;
+    if (!trimmed || loading || isLimitReached) return;
 
     const newMessages: Message[] = [...messages, { role: "user", text: trimmed }];
     setMessages(newMessages);
@@ -260,26 +265,37 @@ function ChatDemo() {
 
             {/* Input */}
             <div className="flex-shrink-0 border-t border-border p-4">
-              <div className="flex items-end gap-3">
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Напишите вопрос или задачу..."
-                  rows={1}
-                  className="flex-1 resize-none rounded-xl border border-border px-4 py-3 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors bg-white"
-                  style={{ maxHeight: 120 }}
-                />
-                <button
-                  onClick={() => sendMessage(input)}
-                  disabled={!input.trim() || loading}
-                  className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-primary/25"
-                >
-                  <Icon name="Send" size={16} className="text-white" />
-                </button>
-              </div>
-              <p className="font-body text-xs text-muted-foreground mt-2 text-center">Enter — отправить · Shift+Enter — новая строка</p>
+              {isLimitReached ? (
+                <div className="text-center py-2">
+                  <p className="font-body text-sm font-semibold text-foreground mb-1">Лимит демо исчерпан</p>
+                  <p className="font-body text-xs text-muted-foreground">Зарегистрируйтесь, чтобы общаться с ИИ без ограничений</p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-end gap-3">
+                    <textarea
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Напишите вопрос или задачу..."
+                      rows={1}
+                      className="flex-1 resize-none rounded-xl border border-border px-4 py-3 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors bg-white"
+                      style={{ maxHeight: 120 }}
+                    />
+                    <button
+                      onClick={() => sendMessage(input)}
+                      disabled={!input.trim() || loading}
+                      className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-primary/25"
+                    >
+                      <Icon name="Send" size={16} className="text-white" />
+                    </button>
+                  </div>
+                  <p className="font-body text-xs text-muted-foreground mt-2 text-center">
+                    Enter — отправить · Shift+Enter — новая строка · {MAX_MESSAGES - userMessageCount} из {MAX_MESSAGES} сообщений
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
