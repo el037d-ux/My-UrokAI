@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Profile from "./pages/Profile";
+import Activate from "./pages/Activate";
 import NotFound from "./pages/NotFound";
 import { UserProvider } from "./context/UserContext";
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/activate/:token" element={<Activate />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

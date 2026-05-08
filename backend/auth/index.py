@@ -2,10 +2,60 @@ import json
 import os
 import hashlib
 import secrets
+import smtplib
 import psycopg2
 import psycopg2.errors
+from datetime import datetime, timezone, timedelta
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 SCHEMA = os.environ.get('MAIN_DB_SCHEMA', 't_p75689129_landing_chatbot_desi')
+PLAN_DAYS = {'7days': 7, '30days': 30}
+PLAN_LABELS = {'7days': '7 дней — 69 ₽', '30days': '30 дней — 260 ₽'}
+SITE_URL = 'https://landing-chatbot-design.poehali.dev'
+
+
+def send_activation_email(to_email: str, plan: str, link: str):
+    smtp_from = os.environ.get('SMTP_FROM', '')
+    smtp_password = os.environ.get('SMTP_PASSWORD', '')
+    if not smtp_from or not smtp_password:
+        return False
+    plan_label = PLAN_LABELS.get(plan, plan)
+    days = PLAN_DAYS.get(plan, 7)
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = 'УрокАИ — ваша ссылка для активации подписки'
+    msg['From'] = f'УрокАИ <{smtp_from}>'
+    msg['To'] = to_email
+    html = f"""<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 20px;">
+<tr><td align="center">
+<table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+<tr><td style="background:linear-gradient(135deg,#1a7c3e,#2da55f);padding:32px;text-align:center;">
+<div style="font-size:28px;font-weight:900;color:#ffffff;">УрокАИ</div>
+<div style="font-size:14px;color:rgba(255,255,255,0.8);margin-top:4px;">ИИ-помощник для педагогов</div>
+</td></tr>
+<tr><td style="padding:36px 32px;">
+<h2 style="margin:0 0 12px;font-size:22px;font-weight:800;color:#1a1f2e;">Ваша подписка готова!</h2>
+<p style="margin:0 0 8px;font-size:15px;color:#6b7280;">Тариф: <strong style="color:#1a1f2e;">{plan_label}</strong></p>
+<p style="margin:0 0 28px;font-size:15px;color:#6b7280;">Нажмите кнопку — вы автоматически войдёте и подписка активируется на <strong style="color:#1a1f2e;">{days} дней</strong>.</p>
+<div style="text-align:center;margin:28px 0;">
+<a href="{link}" style="display:inline-block;padding:16px 36px;background:#1a7c3e;color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;border-radius:12px;">Активировать подписку →</a>
+</div>
+<div style="background:#f8fffe;border:1px solid #d1fae5;border-radius:10px;padding:16px;">
+<p style="margin:0;font-size:13px;color:#6b7280;">⏱ Ссылка действует <strong>48 часов</strong>.</p>
+</div>
+<p style="margin:24px 0 0;font-size:12px;color:#9ca3af;">Если кнопка не работает: <span style="color:#1a7c3e;word-break:break-all;">{link}</span></p>
+</td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #f0f0f0;text-align:center;">
+<p style="margin:0;font-size:12px;color:#9ca3af;">© 2025 УрокАИ</p>
+</td></tr>
+</table></td></tr></table></body></html>"""
+    msg.attach(MIMEText(html, 'html', 'utf-8'))
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+        server.login(smtp_from, smtp_password)
+        server.sendmail(smtp_from, to_email, msg.as_bytes())
+    return True
 
 
 def get_conn():
@@ -121,6 +171,94 @@ def handler(event: dict, context) -> dict:
                 'statusCode': 200,
                 'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
                 'body': json.dumps({'ok': True})
+            }
+
+        elif action == 'generate_payment_link':
+            email = body.get('email', '').strip().lower()
+            plan = body.get('plan', '')
+            if not email or '@' not in email:
+                return {'statusCode': 400, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'ok': False, 'error': 'Введите корректный email'})}
+            if plan not in PLAN_DAYS:
+                return {'statusCode': 400, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'ok': False, 'error': 'Неверный тариф'})}
+
+            pay_token = secrets.token_urlsafe(32)
+            link_expires = datetime.now(timezone.utc) + timedelta(hours=48)
+            cur.execute(
+                f"INSERT INTO {SCHEMA}.payment_links (token, email, plan, expires_at) VALUES (%s, %s, %s, %s)",
+                (pay_token, email, plan, link_expires)
+            )
+            conn.commit()
+            link = f"{SITE_URL}/activate/{pay_token}"
+            try:
+                send_activation_email(email, plan, link)
+                email_sent = True
+            except Exception:
+                email_sent = False
+            return {
+                'statusCode': 200,
+                'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
+                'body': json.dumps({'ok': True, 'email_sent': email_sent, 'link': link}, ensure_ascii=False)
+            }
+
+        elif action == 'activate':
+            pay_token = body.get('token', '').strip()
+            if not pay_token:
+                return {'statusCode': 400, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'ok': False, 'error': 'Токен не указан'})}
+
+            cur.execute(
+                f"SELECT id, email, plan, used, expires_at FROM {SCHEMA}.payment_links WHERE token=%s",
+                (pay_token,)
+            )
+            link_row = cur.fetchone()
+            if not link_row:
+                return {'statusCode': 404, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'ok': False, 'error': 'Ссылка не найдена'})}
+
+            link_id, link_email, plan, used, link_expires = link_row
+
+            if used:
+                return {'statusCode': 410, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'ok': False, 'error': 'Ссылка уже была использована'})}
+
+            if link_expires < datetime.now(timezone.utc):
+                return {'statusCode': 410, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'ok': False, 'error': 'Срок действия ссылки истёк'})}
+
+            cur.execute(f"SELECT id, name FROM {SCHEMA}.users WHERE email=%s", (link_email,))
+            user_row = cur.fetchone()
+
+            if user_row:
+                user_id, name = user_row
+            else:
+                name = link_email.split('@')[0]
+                cur.execute(
+                    f"INSERT INTO {SCHEMA}.users (email, password_hash, name) VALUES (%s, %s, %s) RETURNING id",
+                    (link_email, hashlib.sha256(secrets.token_hex(16).encode()).hexdigest(), name)
+                )
+                user_id = cur.fetchone()[0]
+                cur.execute(f"INSERT INTO {SCHEMA}.usage_counts (user_id) VALUES (%s)", (user_id,))
+                cur.execute(f"INSERT INTO {SCHEMA}.subscriptions (user_id, plan) VALUES (%s, 'free')", (user_id,))
+
+            days = PLAN_DAYS.get(plan, 7)
+            sub_expires = datetime.now(timezone.utc) + timedelta(days=days)
+            cur.execute(f"UPDATE {SCHEMA}.subscriptions SET is_active=FALSE WHERE user_id=%s AND plan!='free'", (user_id,))
+            cur.execute(
+                f"INSERT INTO {SCHEMA}.subscriptions (user_id, plan, is_active, expires_at) VALUES (%s, %s, TRUE, %s)",
+                (user_id, plan, sub_expires)
+            )
+
+            session_token = secrets.token_hex(32)
+            cur.execute(f"INSERT INTO {SCHEMA}.sessions (user_id, token) VALUES (%s, %s)", (user_id, session_token))
+            cur.execute(f"UPDATE {SCHEMA}.payment_links SET used=TRUE WHERE id=%s", (link_id,))
+            conn.commit()
+
+            return {
+                'statusCode': 200,
+                'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
+                'body': json.dumps({
+                    'ok': True,
+                    'token': session_token,
+                    'plan': plan,
+                    'expires_at': sub_expires.isoformat(),
+                    'user': {'id': user_id, 'email': link_email, 'name': name}
+                }, ensure_ascii=False)
             }
 
         else:

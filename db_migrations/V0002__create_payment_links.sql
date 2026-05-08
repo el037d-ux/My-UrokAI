@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS t_p75689129_landing_chatbot_desi.payment_links (
+    id SERIAL PRIMARY KEY,
+    token VARCHAR(64) UNIQUE NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    plan VARCHAR(20) NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
