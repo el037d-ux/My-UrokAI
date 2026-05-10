@@ -3,6 +3,10 @@ import os
 import hashlib
 import secrets
 import smtplib
+import uuid
+import base64
+import urllib.request
+import urllib.error
 import psycopg2
 import psycopg2.errors
 from datetime import datetime, timezone, timedelta
@@ -260,6 +264,127 @@ def handler(event: dict, context) -> dict:
                     'user': {'id': user_id, 'email': link_email, 'name': name}
                 }, ensure_ascii=False)
             }
+
+        elif action == 'create_payment':
+            plan_id = body.get('plan')
+            plans = {
+                '7days':  {'amount': '69.00',  'label': 'Подписка на 7 дней'},
+                '30days': {'amount': '260.00', 'label': 'Подписка на 30 дней'},
+            }
+            plan = plans.get(plan_id)
+            if not plan:
+                return {'statusCode': 400, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'ok': False, 'error': 'Неверный тариф'})}
+
+            email = body.get('email', '').strip().lower()
+            return_url = f"{SITE_URL}/?payment=success"
+
+            payment_data = {
+                'amount': {'value': plan['amount'], 'currency': 'RUB'},
+                'confirmation': {'type': 'redirect', 'return_url': return_url},
+                'capture': True,
+                'description': plan['label'],
+                'metadata': {'plan': plan_id, 'email': email},
+            }
+            if email:
+                payment_data['receipt'] = {
+                    'customer': {'email': email},
+                    'items': [{
+                        'description': plan['label'],
+                        'quantity': '1.00',
+                        'amount': {'value': plan['amount'], 'currency': 'RUB'},
+                        'vat_code': 1,
+                        'payment_mode': 'full_payment',
+                        'payment_subject': 'service',
+                    }]
+                }
+
+            shop_id = os.environ['YOOKASSA_SHOP_ID']
+            secret_key = os.environ['YOOKASSA_SECRET_KEY']
+            credentials = base64.b64encode(f"{shop_id}:{secret_key}".encode()).decode()
+            req = urllib.request.Request(
+                'https://api.yookassa.ru/v3/payments',
+                data=json.dumps(payment_data).encode(),
+                headers={
+                    'Authorization': f'Basic {credentials}',
+                    'Content-Type': 'application/json',
+                    'Idempotence-Key': str(uuid.uuid4()),
+                },
+                method='POST'
+            )
+            try:
+                with urllib.request.urlopen(req) as resp:
+                    result = json.loads(resp.read().decode())
+                return {
+                    'statusCode': 200,
+                    'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
+                    'body': json.dumps({'ok': True, 'payment_id': result['id'], 'confirmation_url': result['confirmation']['confirmation_url']})
+                }
+            except urllib.error.HTTPError as e:
+                err_body = e.read().decode()
+                return {'statusCode': 500, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'ok': False, 'error': f'ЮКасса: {err_body}'})}
+
+        elif action == 'check_payment':
+            payment_id = body.get('payment_id')
+            if not payment_id:
+                return {'statusCode': 400, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'ok': False, 'error': 'Нет payment_id'})}
+
+            shop_id = os.environ['YOOKASSA_SHOP_ID']
+            secret_key = os.environ['YOOKASSA_SECRET_KEY']
+            credentials = base64.b64encode(f"{shop_id}:{secret_key}".encode()).decode()
+            req = urllib.request.Request(
+                f'https://api.yookassa.ru/v3/payments/{payment_id}',
+                headers={'Authorization': f'Basic {credentials}'},
+                method='GET'
+            )
+            try:
+                with urllib.request.urlopen(req) as resp:
+                    result = json.loads(resp.read().decode())
+                status = result.get('status')
+                paid = result.get('paid', False)
+                metadata = result.get('metadata', {})
+
+                if paid and status == 'succeeded':
+                    plan_id = metadata.get('plan')
+                    link_email = metadata.get('email', '').strip().lower()
+                    if plan_id and link_email:
+                        cur.execute(f"SELECT id, name FROM {SCHEMA}.users WHERE email=%s", (link_email,))
+                        user_row = cur.fetchone()
+                        if user_row:
+                            user_id, name = user_row
+                        else:
+                            name = link_email.split('@')[0]
+                            cur.execute(
+                                f"INSERT INTO {SCHEMA}.users (email, password_hash, name) VALUES (%s, %s, %s) RETURNING id",
+                                (link_email, hashlib.sha256(secrets.token_hex(16).encode()).hexdigest(), name)
+                            )
+                            user_id = cur.fetchone()[0]
+                            cur.execute(f"INSERT INTO {SCHEMA}.usage_counts (user_id) VALUES (%s)", (user_id,))
+                            cur.execute(f"INSERT INTO {SCHEMA}.subscriptions (user_id, plan) VALUES (%s, 'free')", (user_id,))
+
+                        days = PLAN_DAYS.get(plan_id, 7)
+                        sub_expires = datetime.now(timezone.utc) + timedelta(days=days)
+                        cur.execute(f"UPDATE {SCHEMA}.subscriptions SET is_active=FALSE WHERE user_id=%s AND plan!='free'", (user_id,))
+                        cur.execute(
+                            f"INSERT INTO {SCHEMA}.subscriptions (user_id, plan, is_active, expires_at) VALUES (%s, %s, TRUE, %s) ON CONFLICT DO NOTHING",
+                            (user_id, plan_id, sub_expires)
+                        )
+                        session_token = secrets.token_hex(32)
+                        cur.execute(f"INSERT INTO {SCHEMA}.sessions (user_id, token) VALUES (%s, %s)", (user_id, session_token))
+                        conn.commit()
+                        return {
+                            'statusCode': 200,
+                            'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
+                            'body': json.dumps({'ok': True, 'status': status, 'paid': paid, 'token': session_token, 'user': {'id': user_id, 'email': link_email, 'name': name}})
+                        }
+
+                return {
+                    'statusCode': 200,
+                    'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
+                    'body': json.dumps({'ok': True, 'status': status, 'paid': paid})
+                }
+            except urllib.error.HTTPError as e:
+                err_body = e.read().decode()
+                return {'statusCode': 500, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'ok': False, 'error': f'ЮКасса: {err_body}'})}
 
         elif action == 'send_email':
             to = body.get('to', '').strip()
