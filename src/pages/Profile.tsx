@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/context/UserContext";
 import Icon from "@/components/ui/icon";
+
+const USER_STATUS_URL = "https://functions.poehali.dev/e173392a-d801-4fb1-8a22-1d4eae8245b0";
+const AUTH_URL = "https://functions.poehali.dev/43173cf5-6a15-477a-b57b-72f11019ab4b";
 
 const PLAN_LABELS: Record<string, string> = {
   free: "Бесплатный",
@@ -15,11 +18,18 @@ const PLAN_COLORS: Record<string, string> = {
   "30days": "bg-indigo-light text-primary border-indigo-mid",
 };
 
-type Tab = "profile" | "history" | "settings";
+const TYPE_META: Record<string, { label: string; icon: string; color: string; bg: string }> = {
+  lesson: { label: "Урок", icon: "BookOpen", color: "text-primary", bg: "bg-indigo-light" },
+  game: { label: "Игра", icon: "Gamepad2", color: "text-amber", bg: "bg-amber-light" },
+  analysis: { label: "Анализ", icon: "BarChart2", color: "text-teal", bg: "bg-teal-light" },
+};
+
+type Tab = "profile" | "history" | "saved" | "settings";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "profile", label: "Профиль", icon: "User" },
   { id: "history", label: "История", icon: "Clock" },
+  { id: "saved", label: "Сохранённые", icon: "Bookmark" },
   { id: "settings", label: "Настройки", icon: "Settings" },
 ];
 
@@ -27,6 +37,39 @@ function Spinner() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-indigo-light/30 to-teal-light/20">
       <div className="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+    </div>
+  );
+}
+
+function LoadingCard({ text }: { text: string }) {
+  return (
+    <div className="bg-white rounded-3xl border border-border shadow-sm p-8 flex items-center justify-center gap-3">
+      <div className="w-5 h-5 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+      <span className="font-body text-sm text-muted-foreground">{text}</span>
+    </div>
+  );
+}
+
+function EmptyCard({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+  return (
+    <div className="bg-white rounded-3xl border border-border shadow-sm p-12 text-center">
+      <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+        <Icon name={icon} fallback="BookOpen" size={24} className="text-muted-foreground" />
+      </div>
+      <div className="font-display text-base font-bold text-foreground mb-1">{title}</div>
+      <p className="font-body text-sm text-muted-foreground">{desc}</p>
+    </div>
+  );
+}
+
+function ErrorCard({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="bg-white rounded-3xl border border-border shadow-sm p-8 text-center">
+      <Icon name="WifiOff" size={36} className="text-muted-foreground mx-auto mb-3" />
+      <div className="font-body text-sm text-muted-foreground mb-4">Не удалось загрузить данные</div>
+      <button onClick={onRetry} className="px-4 py-2 rounded-xl bg-primary text-white font-body text-sm font-medium">
+        Повторить
+      </button>
     </div>
   );
 }
@@ -145,94 +188,55 @@ function ProfileTab() {
 
 type HistoryItem = {
   id: number;
-  type: "lesson" | "game" | "analysis";
+  type: string;
   title: string;
+  prompt?: string;
   created_at: string;
 };
 
-const TYPE_META: Record<string, { label: string; icon: string; color: string; bg: string }> = {
-  lesson: { label: "Урок", icon: "BookOpen", color: "text-primary", bg: "bg-indigo-light" },
-  game: { label: "Игра", icon: "Gamepad2", color: "text-amber", bg: "bg-amber-light" },
-  analysis: { label: "Анализ", icon: "BarChart2", color: "text-teal", bg: "bg-teal-light" },
-};
-
 function HistoryTab() {
-  const { token, status } = useUser();
+  const { token } = useUser();
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [page, setPage] = useState(0);
-  const PER_PAGE = 8;
+  const [total, setTotal] = useState(0);
+  const PER_PAGE = 10;
 
-  useEffect(() => {
-    if (!token || !status) return;
+  const load = useCallback(async (p: number) => {
+    if (!token) return;
     setLoading(true);
     setError(false);
-    const history: HistoryItem[] = [
-      ...Array.from({ length: status.usage.lessons }, (_, i) => ({
-        id: i + 1,
-        type: "lesson" as const,
-        title: `Урок #${i + 1}`,
-        created_at: new Date(Date.now() - i * 86400000 * 2).toISOString(),
-      })),
-      ...Array.from({ length: status.usage.games }, (_, i) => ({
-        id: 1000 + i,
-        type: "game" as const,
-        title: `Игра #${i + 1}`,
-        created_at: new Date(Date.now() - i * 86400000 * 3 - 43200000).toISOString(),
-      })),
-      ...Array.from({ length: status.usage.analyses }, (_, i) => ({
-        id: 2000 + i,
-        type: "analysis" as const,
-        title: `Анализ #${i + 1}`,
-        created_at: new Date(Date.now() - i * 86400000 - 21600000).toISOString(),
-      })),
-    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-    setTimeout(() => {
-      setItems(history);
+    try {
+      const res = await fetch(`${USER_STATUS_URL}?action=get_history&page=${p}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setItems(data.items);
+        setTotal(data.total);
+      } else {
+        setError(true);
+      }
+    } catch {
+      setError(true);
+    } finally {
       setLoading(false);
-    }, 300);
-  }, [token, status]);
+    }
+  }, [token]);
+
+  useEffect(() => { load(page); }, [load, page]);
 
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
-  const paginated = items.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
-  const totalPages = Math.ceil(items.length / PER_PAGE);
+  const totalPages = Math.ceil(total / PER_PAGE);
 
-  if (loading) {
-    return (
-      <div className="bg-white rounded-3xl border border-border shadow-sm p-8 flex items-center justify-center gap-3">
-        <div className="w-5 h-5 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-        <span className="font-body text-sm text-muted-foreground">Загружаем историю...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white rounded-3xl border border-border shadow-sm p-8 text-center">
-        <Icon name="WifiOff" size={36} className="text-muted-foreground mx-auto mb-3" />
-        <div className="font-body text-sm text-muted-foreground mb-4">Не удалось загрузить историю</div>
-        <button onClick={() => setError(false)} className="px-4 py-2 rounded-xl bg-primary text-white font-body text-sm font-medium">
-          Повторить
-        </button>
-      </div>
-    );
-  }
-
-  if (items.length === 0) {
-    return (
-      <div className="bg-white rounded-3xl border border-border shadow-sm p-12 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-          <Icon name="Clock" size={24} className="text-muted-foreground" />
-        </div>
-        <div className="font-display text-base font-bold text-foreground mb-1">История пуста</div>
-        <p className="font-body text-sm text-muted-foreground">Здесь появятся созданные уроки, игры и анализы</p>
-      </div>
-    );
-  }
+  if (loading) return <LoadingCard text="Загружаем историю..." />;
+  if (error) return <ErrorCard onRetry={() => load(page)} />;
+  if (items.length === 0) return (
+    <EmptyCard icon="Clock" title="История пуста" desc="Здесь появятся созданные уроки, игры и анализы" />
+  );
 
   return (
     <div className="bg-white rounded-3xl border border-border shadow-sm overflow-hidden">
@@ -244,12 +248,12 @@ function HistoryTab() {
           <span className="font-display text-base font-bold text-foreground">История активности</span>
         </div>
         <span className="font-body text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
-          {items.length} записей
+          {total} записей
         </span>
       </div>
       <div className="divide-y divide-border">
-        {paginated.map((item) => {
-          const meta = TYPE_META[item.type];
+        {items.map((item) => {
+          const meta = TYPE_META[item.type] || TYPE_META.lesson;
           return (
             <div key={item.id} className="flex items-center gap-4 px-6 py-4 hover:bg-muted/40 transition-colors">
               <div className={`w-9 h-9 rounded-xl ${meta.bg} flex items-center justify-center flex-shrink-0`}>
@@ -257,9 +261,151 @@ function HistoryTab() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-body text-sm font-semibold text-foreground truncate">{item.title}</div>
+                {item.prompt && (
+                  <div className="font-body text-xs text-muted-foreground mt-0.5 truncate">{item.prompt}</div>
+                )}
                 <div className="font-body text-xs text-muted-foreground mt-0.5">{meta.label}</div>
               </div>
               <div className="font-body text-xs text-muted-foreground flex-shrink-0">{formatDate(item.created_at)}</div>
+            </div>
+          );
+        })}
+      </div>
+      {totalPages > 1 && (
+        <div className="p-4 border-t border-border flex items-center justify-between">
+          <button
+            disabled={page === 0}
+            onClick={() => setPage((p) => p - 1)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border font-body text-xs text-muted-foreground disabled:opacity-40 hover:border-primary hover:text-primary transition-all"
+          >
+            <Icon name="ChevronLeft" size={14} /> Назад
+          </button>
+          <span className="font-body text-xs text-muted-foreground">{page + 1} / {totalPages}</span>
+          <button
+            disabled={page >= totalPages - 1}
+            onClick={() => setPage((p) => p + 1)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border font-body text-xs text-muted-foreground disabled:opacity-40 hover:border-primary hover:text-primary transition-all"
+          >
+            Далее <Icon name="ChevronRight" size={14} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type SavedItem = {
+  id: number;
+  type: string;
+  title: string;
+  history_id?: number;
+  created_at: string;
+};
+
+function SavedTab() {
+  const { token } = useUser();
+  const [items, setItems] = useState<SavedItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [removingId, setRemovingId] = useState<number | null>(null);
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const PER_PAGE = 10;
+
+  const load = useCallback(async (p: number) => {
+    if (!token) return;
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch(`${USER_STATUS_URL}?action=get_saved&page=${p}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setItems(data.items);
+        setTotal(data.total);
+      } else {
+        setError(true);
+      }
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => { load(page); }, [load, page]);
+
+  const handleUnsave = async (id: number) => {
+    if (!token) return;
+    setRemovingId(id);
+    try {
+      const res = await fetch(USER_STATUS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: "unsave_material", id }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setItems((prev) => prev.filter((i) => i.id !== id));
+        setTotal((t) => t - 1);
+      }
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" });
+
+  const totalPages = Math.ceil(total / PER_PAGE);
+
+  if (loading) return <LoadingCard text="Загружаем сохранённые..." />;
+  if (error) return <ErrorCard onRetry={() => load(page)} />;
+  if (items.length === 0) return (
+    <EmptyCard icon="Bookmark" title="Нет сохранённых материалов" desc="Сохраняйте уроки, игры и анализы — они появятся здесь" />
+  );
+
+  return (
+    <div className="bg-white rounded-3xl border border-border shadow-sm overflow-hidden">
+      <div className="p-6 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-indigo-light flex items-center justify-center">
+            <Icon name="Bookmark" size={16} className="text-primary" />
+          </div>
+          <span className="font-display text-base font-bold text-foreground">Сохранённые материалы</span>
+        </div>
+        <span className="font-body text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
+          {total} материалов
+        </span>
+      </div>
+      <div className="divide-y divide-border">
+        {items.map((item) => {
+          const meta = TYPE_META[item.type] || TYPE_META.lesson;
+          return (
+            <div key={item.id} className="flex items-center gap-4 px-6 py-4 hover:bg-muted/40 transition-colors group">
+              <div className={`w-9 h-9 rounded-xl ${meta.bg} flex items-center justify-center flex-shrink-0`}>
+                <Icon name={meta.icon} fallback="BookOpen" size={16} className={meta.color} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-body text-sm font-semibold text-foreground truncate">{item.title}</div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className={`text-xs font-body font-medium px-2 py-0.5 rounded-full ${meta.bg} ${meta.color}`}>
+                    {meta.label}
+                  </span>
+                  <span className="font-body text-xs text-muted-foreground">{formatDate(item.created_at)}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => handleUnsave(item.id)}
+                disabled={removingId === item.id}
+                className="opacity-0 group-hover:opacity-100 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border font-body text-xs text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-all disabled:opacity-50 flex-shrink-0"
+                title="Убрать из сохранённых"
+              >
+                {removingId === item.id
+                  ? <div className="w-3.5 h-3.5 rounded-full border-2 border-destructive/30 border-t-destructive animate-spin" />
+                  : <Icon name="BookmarkX" size={14} />}
+              </button>
             </div>
           );
         })}
@@ -299,8 +445,6 @@ function SettingsTab() {
   const [pwdLoading, setPwdLoading] = useState(false);
   const [pwdSuccess, setPwdSuccess] = useState(false);
   const [pwdError, setPwdError] = useState("");
-
-  const AUTH_URL = "https://functions.poehali.dev/43173cf5-6a15-477a-b57b-72f11019ab4b";
 
   const saveName = async () => {
     if (!name.trim()) { setNameError("Имя не может быть пустым"); return; }
@@ -487,12 +631,12 @@ export default function Profile() {
           </button>
         </div>
 
-        <div className="flex gap-1 p-1 bg-white rounded-2xl border border-border shadow-sm">
+        <div className="flex gap-1 p-1 bg-white rounded-2xl border border-border shadow-sm overflow-x-auto">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-body text-sm font-semibold transition-all ${
+              className={`flex-shrink-0 flex items-center justify-center gap-2 py-2.5 px-3 sm:px-4 rounded-xl font-body text-sm font-semibold transition-all ${
                 tab === t.id
                   ? "bg-primary text-white shadow-sm shadow-primary/25"
                   : "text-muted-foreground hover:text-foreground"
@@ -506,6 +650,7 @@ export default function Profile() {
 
         {tab === "profile" && <ProfileTab />}
         {tab === "history" && <HistoryTab />}
+        {tab === "saved" && <SavedTab />}
         {tab === "settings" && <SettingsTab />}
       </div>
     </div>
