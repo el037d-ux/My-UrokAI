@@ -1,7 +1,9 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
+import { useUser } from "@/context/UserContext";
 
 const GENERATE_LESSON_URL = "https://functions.poehali.dev/1186dab1-1c68-4be5-95d4-74d1e710571e";
+const USER_STATUS_URL = "https://functions.poehali.dev/e173392a-d801-4fb1-8a22-1d4eae8245b0";
 
 const CLASS_OPTIONS = ["1 класс","2 класс","3 класс","4 класс","5 класс","6 класс","7 класс","8 класс","9 класс","10 класс","11 класс","СПО / колледж","Студенты / взрослые"];
 const DURATION_OPTIONS = ["45 мин","60 мин","90 мин","120 мин"];
@@ -103,9 +105,34 @@ function downloadLesson(lesson: LessonPlan) {
   URL.revokeObjectURL(url);
 }
 
-function LessonResult({ lesson, onClose }: { lesson: LessonPlan; onClose: () => void }) {
+function LessonResult({ lesson, historyId, onClose }: { lesson: LessonPlan; historyId: number | null; onClose: () => void }) {
+  const { token } = useUser();
   const [tab, setTab] = useState<"plan" | "handouts" | "assessment" | "risks">("plan");
   const [activeStage, setActiveStage] = useState(0);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!token || saving || saved) return;
+    setSaving(true);
+    try {
+      const res = await fetch(USER_STATUS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          action: "save_material",
+          type: "lesson",
+          title: lesson.title,
+          content: JSON.stringify(lesson),
+          history_id: historyId,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) setSaved(true);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>
@@ -353,9 +380,25 @@ function LessonResult({ lesson, onClose }: { lesson: LessonPlan; onClose: () => 
         </div>
 
         {/* Footer */}
-        <div className="px-4 sm:px-8 py-4 border-t border-border flex-shrink-0">
+        <div className="px-4 sm:px-8 py-4 border-t border-border flex-shrink-0 flex gap-3">
+          {token && (
+            <button
+              onClick={handleSave}
+              disabled={saving || saved}
+              className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-body text-sm font-bold transition-all active:scale-95 border ${
+                saved
+                  ? "bg-teal-light border-teal/30 text-teal"
+                  : "bg-white border-border text-foreground hover:border-primary/40 hover:bg-indigo-light"
+              } disabled:opacity-60`}
+            >
+              {saving
+                ? <div className="w-4 h-4 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                : <Icon name={saved ? "BookmarkCheck" : "Bookmark"} size={16} />}
+              {saved ? "Сохранено" : "Сохранить"}
+            </button>
+          )}
           <button onClick={() => downloadLesson(lesson)}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-white font-body text-sm font-bold hover:bg-primary/90 transition-all active:scale-95 shadow-md shadow-primary/25">
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-white font-body text-sm font-bold hover:bg-primary/90 transition-all active:scale-95 shadow-md shadow-primary/25">
             <Icon name="Download" size={16} />
             Скачать план-конспект
           </button>
@@ -366,6 +409,7 @@ function LessonResult({ lesson, onClose }: { lesson: LessonPlan; onClose: () => 
 }
 
 export default function LessonWizard({ onClose }: { onClose: () => void }) {
+  const { token, incrementUsage } = useUser();
   const [step, setStep] = useState(1);
   const [animating, setAnimating] = useState(false);
   const [direction, setDirection] = useState<"next" | "prev">("next");
@@ -378,6 +422,7 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [lesson, setLesson] = useState<LessonPlan | null>(null);
+  const [historyId, setHistoryId] = useState<number | null>(null);
 
   const goTo = (next: number, dir: "next" | "prev") => {
     if (animating) return;
@@ -406,6 +451,24 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
       const data = await res.json();
       if (data.ok && data.lesson) {
         setLesson(data.lesson);
+        await incrementUsage("lessons");
+        if (token) {
+          try {
+            const hr = await fetch(USER_STATUS_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+              body: JSON.stringify({
+                action: "add_history",
+                type: "lesson",
+                title: data.lesson.title,
+                prompt: `${form.subject}, ${form.grade}, ${form.topic}`,
+                result: JSON.stringify(data.lesson),
+              }),
+            });
+            const hd = await hr.json();
+            if (hd.ok && hd.id) setHistoryId(hd.id);
+          } catch { /* не критично */ }
+        }
       } else {
         setError("Не удалось создать план. Попробуйте ещё раз.");
       }
@@ -420,7 +483,7 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
     ? direction === "next" ? "opacity-0 translate-x-4" : "opacity-0 -translate-x-4"
     : "opacity-100 translate-x-0";
 
-  if (lesson) return <LessonResult lesson={lesson} onClose={onClose} />;
+  if (lesson) return <LessonResult lesson={lesson} historyId={historyId} onClose={onClose} />;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>

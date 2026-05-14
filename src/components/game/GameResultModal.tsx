@@ -2,8 +2,36 @@ import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { Game, downloadGame } from "./GameTypes";
 
-export default function GameResultModal({ game, onClose }: { game: Game; onClose: () => void }) {
+const USER_STATUS_URL = "https://functions.poehali.dev/e173392a-d801-4fb1-8a22-1d4eae8245b0";
+
+export default function GameResultModal({ game, historyId, token, onClose }: {
+  game: Game; historyId: number | null; token: string | null; onClose: () => void;
+}) {
   const [tab, setTab] = useState<"overview" | "materials" | "tips">("overview");
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!token || saving || saved) return;
+    setSaving(true);
+    try {
+      const res = await fetch(USER_STATUS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          action: "save_material",
+          type: "game",
+          title: game.name,
+          content: JSON.stringify(game),
+          history_id: historyId,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) setSaved(true);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>
@@ -181,9 +209,25 @@ export default function GameResultModal({ game, onClose }: { game: Game; onClose
         </div>
 
         {/* Footer */}
-        <div className="px-4 sm:px-8 py-4 border-t border-border flex-shrink-0">
+        <div className="px-4 sm:px-8 py-4 border-t border-border flex-shrink-0 flex gap-3">
+          {token && (
+            <button
+              onClick={handleSave}
+              disabled={saving || saved}
+              className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-body text-sm font-bold transition-all active:scale-95 border ${
+                saved
+                  ? "bg-teal-light border-teal/30 text-teal"
+                  : "bg-white border-border text-foreground hover:border-amber/40 hover:bg-amber-light"
+              } disabled:opacity-60`}
+            >
+              {saving
+                ? <div className="w-4 h-4 rounded-full border-2 border-amber/20 border-t-amber animate-spin" />
+                : <Icon name={saved ? "BookmarkCheck" : "Bookmark"} size={16} />}
+              {saved ? "Сохранено" : "Сохранить"}
+            </button>
+          )}
           <button onClick={() => downloadGame(game)}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-amber text-foreground font-body text-sm font-bold hover:bg-amber/90 transition-all active:scale-95 shadow-md shadow-amber/25">
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-amber text-foreground font-body text-sm font-bold hover:bg-amber/90 transition-all active:scale-95 shadow-md shadow-amber/25">
             <Icon name="Download" size={16} />
             Скачать игру с материалами
           </button>

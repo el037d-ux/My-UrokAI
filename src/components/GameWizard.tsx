@@ -3,8 +3,12 @@ import Icon from "@/components/ui/icon";
 import { STEPS, GENERATE_GAME_URL, Game, GameForm } from "./game/GameTypes";
 import GameResultModal from "./game/GameResultModal";
 import GameWizardSteps from "./game/GameWizardSteps";
+import { useUser } from "@/context/UserContext";
+
+const USER_STATUS_URL = "https://functions.poehali.dev/e173392a-d801-4fb1-8a22-1d4eae8245b0";
 
 export default function GameWizard({ onClose }: { onClose: () => void }) {
+  const { token, incrementUsage } = useUser();
   const [step, setStep] = useState(1);
   const [animating, setAnimating] = useState(false);
   const [direction, setDirection] = useState<"next" | "prev">("next");
@@ -15,6 +19,7 @@ export default function GameWizard({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [game, setGame] = useState<Game | null>(null);
+  const [historyId, setHistoryId] = useState<number | null>(null);
 
   const goTo = (next: number, dir: "next" | "prev") => {
     if (animating) return;
@@ -43,6 +48,24 @@ export default function GameWizard({ onClose }: { onClose: () => void }) {
       const data = await res.json();
       if (data.ok && data.game) {
         setGame(data.game);
+        await incrementUsage("games");
+        if (token) {
+          try {
+            const hr = await fetch(USER_STATUS_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+              body: JSON.stringify({
+                action: "add_history",
+                type: "game",
+                title: data.game.name,
+                prompt: `${form.subject}, ${form.grade}, ${form.topic}`,
+                result: JSON.stringify(data.game),
+              }),
+            });
+            const hd = await hr.json();
+            if (hd.ok && hd.id) setHistoryId(hd.id);
+          } catch { /* не критично */ }
+        }
       } else {
         setError("Не удалось создать игру. Попробуйте ещё раз.");
       }
@@ -57,7 +80,7 @@ export default function GameWizard({ onClose }: { onClose: () => void }) {
     ? direction === "next" ? "opacity-0 translate-x-4" : "opacity-0 -translate-x-4"
     : "opacity-100 translate-x-0";
 
-  if (game) return <GameResultModal game={game} onClose={onClose} />;
+  if (game) return <GameResultModal game={game} historyId={historyId} token={token} onClose={onClose} />;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>
