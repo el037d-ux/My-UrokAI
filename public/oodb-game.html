@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ООБД сетевых ресурсов</title>
+  <style>
+    :root {
+      --bg: #f4f6f9; --panel: #ffffff; --primary: #2563eb; --primary-hover: #1d4ed8;
+      --success: #10b981; --warning: #f59e0b; --error: #ef4444;
+      --text: #1e293b; --muted: #64748b; --border: #e2e8f0; --shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --selected-glow: 0 0 0 3px rgba(37,99,235,0.3);
+      --assigned-glow: 0 0 0 3px rgba(16,185,129,0.3);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.5; padding: 16px;
+      transition: background 0.3s;
+    }
+    .container {
+      max-width: 1150px; margin: 0 auto; background: var(--panel);
+      border-radius: 12px; box-shadow: var(--shadow); padding: 20px;
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px; border-bottom: 2px solid var(--border);
+      padding-bottom: 10px; flex-wrap: wrap; gap: 10px;
+    }
+    h1 { font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+    .progress-wrap { display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 8px; }
+    .progress-bar-bg { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #60a5fa); width: 10%; transition: width 0.4s ease; }
+    .badge { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; background: #e0e7ff; color: #3730a3; font-weight: 600; }
+
+    .grid { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
+    @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px; transition: border-color 0.2s;
+    }
+    .panel:hover { border-color: var(--primary); }
+    .panel h2 { font-size: 1.05rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+
+    .list { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding-right: 4px; }
+    .list::-webkit-scrollbar { width: 6px; }
+    .list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    .card {
+      background: #fff; border: 2px solid var(--border); border-radius: 8px;
+      padding: 10px; cursor: pointer; transition: all 0.2s ease;
+      position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: transparent; transition: background 0.2s;
+    }
+    .card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .card.selected {
+      border-color: var(--primary);
+      box-shadow: var(--selected-glow);
+      background: #eff6ff;
+    }
+    .card.selected::before { background: var(--primary); }
+    .card.assigned {
+      border-color: var(--success);
+      opacity: 0.95;
+      background: #f0fdf4;
+    }
+    .card.assigned::before { background: var(--success); }
+    .card:active { transform: scale(0.99); }
+
+    .card h3 { font-size: 0.9rem; margin-bottom: 2px; font-weight: 600; }
+    .card p { font-size: 0.8rem; color: var(--muted); margin: 2px 0; min-height: 1.2em; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+    .tag {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #f1f5f9; padding: 2px 6px; border-radius: 4px;
+      font-size: 0.7rem; color: #475569; font-weight: 500;
+      transition: background 0.2s;
+    }
+    .tag:hover { background: #e2e8f0; }
+    .tag.type { background: #dbeafe; color: #1e40af; }
+    .tag.weight { background: #fef3c7; color: #92400e; }
+    .tag.sec { background: #fee2e2; color: #b91c1c; }
+    .tag.region { background: #ede9fe; color: #5b21b6; }
+
+    .node-stats { font-size: 0.8rem; margin-top: 6px; }
+    .progress-node { height: 5px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin: 4px 0; }
+    .progress-node-bar {
+      height: 100%; background: linear-gradient(90deg, var(--primary), #60a5fa);
+      transition: width 0.3s ease; border-radius: 3px;
+    }
+    .progress-node-bar.over { background: linear-gradient(90deg, var(--error), #f87171); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+    .assigned-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; min-height: 20px; }
+    .mini-tag {
+      font-size: 0.7rem; padding: 2px 6px; background: #dbeafe;
+      border-radius: 4px; color: #1e40af; font-weight: 500;
+      animation: popIn 0.2s ease;
+    }
+    @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .controls {
+      margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+      padding-top: 12px; border-top: 1px solid var(--border);
+    }
+    button {
+      padding: 9px 14px; border: none; border-radius: 6px;
+      background: var(--primary); color: white; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    button:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    button.secondary { background: #e2e8f0; color: var(--text); }
+    button.secondary:hover { background: #cbd5e1; }
+    button.success { background: var(--success); }
+    button.success:hover { background: #059669; }
+    button.export { background: #7c3aed; }
+    button.export:hover { background: #6d28d9; }
+
+    .theory-box {
+      margin-top: 10px; padding: 10px; background: #eff6ff;
+      border-left: 4px solid var(--primary); border-radius: 4px;
+      font-size: 0.82rem; line-height: 1.4;
+    }
+    .hint-area {
+      width: 100%; margin-top: 8px; color: var(--warning);
+      font-size: 0.85rem; min-height: 20px; font-weight: 500;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .modal {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6); display: none;
+      align-items: center; justify-content: center; z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+    .modal.active { display: flex; animation: fadeIn 0.2s; }
+    .modal-content {
+      background: white; padding: 24px; border-radius: 12px;
+      max-width: 600px; width: 90%; text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal h2 { margin-bottom: 12px; font-size: 1.3rem; }
+    .modal p { margin-bottom: 16px; color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
+    .modal-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    .stats-panel {
+      margin-top: 16px; padding: 12px; background: #f8fafc;
+      border-radius: 8px; border: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px; margin-top: 8px;
+    }
+    .stat-item {
+      background: white; padding: 8px; border-radius: 6px;
+      text-align: center; border: 1px solid var(--border);
+    }
+    .stat-value { font-weight: 600; color: var(--primary); font-size: 1.1rem; }
+    .stat-label { color: var(--muted); font-size: 0.75rem; }
+
+    .toast {
+      position: fixed; bottom: 20px; right: 20px;
+      background: var(--text); color: white;
+      padding: 10px 16px; border-radius: 8px;
+      font-size: 0.9rem; box-shadow: var(--shadow);
+      z-index: 200; animation: slideInRight 0.3s ease;
+      display: none;
+    }
+    .toast.show { display: block; }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--error); }
+    .toast.info { background: var(--primary); }
+    @keyframes slideInRight { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    .drag-hint {
+      font-size: 0.75rem; color: var(--muted);
+      text-align: center; margin-top: 8px; font-style: italic;
+    }
+
+    .confetti {
+      position: fixed; width: 10px; height: 10px;
+      background: var(--success); border-radius: 50%;
+      animation: confetti-fall 3s ease-out forwards;
+      pointer-events: none; z-index: 150;
+    }
+    @keyframes confetti-fall {
+      to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .export-preview {
+      background: #1e293b; color: #e2e8f0;
+      padding: 12px; border-radius: 6px;
+      font-family: monospace; font-size: 0.75rem;
+      max-height: 150px; overflow: auto;
+      text-align: left; white-space: pre;
+      margin-top: 12px;
+    }
+
+    .error-highlight {
+      border-color: var(--error) !important;
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.3) !important;
+      background: #fff5f5 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 id="levelTitle">🧩 Задание 1/10</h1>
+      <div style="text-align: right;">
+        <div class="badge" id="levelBadge">Уровень 1</div>
+        <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">
+          Попыток: <span id="attemptCount">0</span>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="globalProgress"></div>
+        </div>
+        <span id="progressText" style="font-size: 0.8rem; color: var(--muted);">10%</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>📦 Объекты ООБД <span class="badge">Данные</span></h2>
+        <p style="font-size:0.8rem; color:var(--muted); margin-bottom:8px;">
+          👆 Выберите объект → кликните по узлу для размещения
+        </p>
+        <div id="objectsPanel" class="list"></div>
+        <div class="drag-hint">💡 Совет: можно кликать в любом порядке</div>
+        <div class="theory-box" id="theoryBox"></div>
+      </div>
+
+      <div class="panel">
+        <h2>🖥 Сетевые узлы <span class="badge">ОС-среда</span></h2>
+        <p style="font-size:0.8rem; color:var(--muted); margin-bottom:8px;">
+          📊 Учитывайте capacity, типы, зоны и зависимости
+        </p>
+        <div id="nodesPanel" class="list"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="checkBtn" disabled>✅ Проверить</button>
+      <button id="hintBtn" class="secondary">💡 Подсказка</button>
+      <button id="resetBtn" class="secondary">🔄 Сброс</button>
+      <button id="skipBtn" class="secondary">⏭ Пропустить</button>
+      <button id="exportBtn" class="export">📊 Экспорт CSV</button>
+      <div id="hintArea" class="hint-area"></div>
+    </div>
+
+    <div class="stats-panel">
+      <strong>📈 Статистика сессии:</strong>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="statCompleted">0/10</div>
+          <div class="stat-label">Пройдено</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statTotalAttempts">0</div>
+          <div class="stat-label">Всего попыток</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statTime">00:00</div>
+          <div class="stat-label">Время</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statAvgAttempts">–</div>
+          <div class="stat-label">Ср. попыток/уровень</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="resultModal" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle"></h2>
+      <p id="modalText"></p>
+      <div class="modal-actions">
+        <button id="nextLevelBtn" class="success">➡️ Следующее задание</button>
+        <button id="closeModalBtn" class="secondary">🔙 Вернуться</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="exportModal" class="modal">
+    <div class="modal-content">
+      <h2>📊 Предпросмотр CSV</h2>
+      <p style="font-size:0.85rem; color:var(--muted);">Файл можно открыть в Excel, Google Sheets или импортировать в LMS</p>
+      <div class="export-preview" id="exportPreview"></div>
+      <div class="modal-actions" style="margin-top:16px;">
+        <button id="downloadCsvBtn" class="success">💾 Скачать CSV</button>
+        <button id="closeExportBtn" class="secondary">✕ Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const LEVELS = [
+      {
+        id: 1, title: "Базовая типизация и capacity",
+        rule: "Разместите объекты, соблюдая capacity узлов и разрешённые типы классов ООБД.",
+        objects: [
+          { id:'o1', name:'Web-сервер', w:3, type:'Service', desc:'HTTP-обработка запросов' },
+          { id:'o2', name:'Файловое хранилище', w:4, type:'Storage', desc:'Блоки и метаданные' },
+          { id:'o3', name:'IoT-датчик', w:2, type:'Device', desc:'Потоковые события' }
+        ],
+        nodes: [
+          { id:'nA', name:'Узел Alpha', cap:5, types:['Service','Device'] },
+          { id:'nB', name:'Узел Beta', cap:7, types:['Storage','Service'] }
+        ],
+        hints: ["⚠️ Storage не поддерживается в Alpha", "📊 Проверьте суммарный weight ≤ capacity"],
+        theory: "🔐 Инкапсуляция типов: ОС контролирует совместимость драйверов и сервисов через таблицы дескрипторов."
+      },
+      {
+        id: 2, title: "Наследование и affinity",
+        rule: "Main_DB и DB_Replica должны находиться в узлах с поддержкой Database/Replicable для консистентности.",
+        objects: [
+          { id:'o4', name:'Main_DB', w:4, type:'Database', desc:'Первичные данные' },
+          { id:'o5', name:'DB_Replica', w:3, type:'Replicable', desc:'Наследует Database' },
+          { id:'o6', name:'API_Gateway', w:2, type:'Service', desc:'Маршрутизация' },
+          { id:'o7', name:'Cache', w:2, type:'Service', desc:'Ускорение чтения' }
+        ],
+        nodes: [
+          { id:'nA', name:'High-IO', cap:6, types:['Database','Replicable'] },
+          { id:'nB', name:'Low-Latency', cap:4, types:['Service','Database'] },
+          { id:'nC', name:'Archive', cap:10, types:['Replicable','Storage'] }
+        ],
+        hints: ["🔗 Связанные объекты требуют proximity (affinity)", "⚡ Cache и Gateway логически группируются по задержке"],
+        theory: "🎯 Affinity scheduling: связанные процессы размещаются близко для снижения накладных расходов на межпроцессное взаимодействие (IPC)."
+      },
+      {
+        id: 3, title: "Отказоустойчивость",
+        rule: "Все Replicable объекты должны быть размещены на РАЗНЫХ узлах (принцип репликации).",
+        objects: [
+          { id:'o8', name:'Config_Manager', w:2, type:'Replicable', desc:'Конфигурации ОС' },
+          { id:'o9', name:'Log_Aggregator', w:3, type:'Service', desc:'Сбор логов' },
+          { id:'o10', name:'State_DB', w:4, type:'Replicable', desc:'Критичные состояния' },
+          { id:'o11', name:'Monitor', w:1, type:'Service', desc:'Наблюдение' }
+        ],
+        nodes: [
+          { id:'nA', name:'Zone Primary', cap:6, types:['Service','Replicable'] },
+          { id:'nB', name:'Zone Secondary', cap:5, types:['Replicable','Database'] },
+          { id:'nC', name:'Zone Edge', cap:4, types:['Service'] }
+        ],
+        hints: ["🔄 Replicable нельзя класть в один узел", "⚖️ State_DB весит 4 — проверьте capacity в двух зонах"],
+        theory: "🛡️ Fault tolerance: распределённые ОС используют quorum и consensus для сохранения консистентности при отказе узла."
+      },
+      {
+        id: 4, title: "Безопасность и изоляция",
+        rule: "Уровень безопасности объекта не должен превышать clearance узла.",
+        objects: [
+          { id:'o12', name:'Auth_Server', w:2, sec:3, type:'Security', desc:'Высокий класс' },
+          { id:'o13', name:'Web_Proxy', w:3, sec:1, type:'Network', desc:'Публичный' },
+          { id:'o14', name:'Audit_DB', w:3, sec:2, type:'Storage', desc:'Внутренний' }
+        ],
+        nodes: [
+          { id:'nA', name:'DMZ', cap:5, types:['Network'], clearance:1 },
+          { id:'nB', name:'Internal', cap:6, types:['Security','Storage'], clearance:3 },
+          { id:'nC', name:'Public', cap:4, types:['Network'], clearance:1 }
+        ],
+        hints: ["🔐 Sec-объекты требуют clearance ≥ sec объекта", "🌐 Web_Proxy (public) логичнее в DMZ"],
+        theory: "🔒 Isolation namespaces: ОС разделяет контексты выполнения через namespaces/cgroups для предотвращения privilege escalation."
+      },
+      {
+        id: 5, title: "Балансировка нагрузки",
+        rule: "Загрузка ни одного узла не должна превышать 75% от capacity.",
+        objects: [
+          { id:'o15', name:'Worker_A', w:3, type:'Compute', desc:'Вычисления' },
+          { id:'o16', name:'Worker_B', w:3, type:'Compute', desc:'Вычисления' },
+          { id:'o17', name:'Worker_C', w:2, type:'Compute', desc:'Вычисления' },
+          { id:'o18', name:'Scheduler', w:2, type:'Control', desc:'Управление' }
+        ],
+        nodes: [
+          { id:'nA', name:'Node_1', cap:8, types:['Compute','Control'] },
+          { id:'nB', name:'Node_2', cap:6, types:['Compute','Control'] },
+          { id:'nC', name:'Node_3', cap:4, types:['Compute'] }
+        ],
+        hints: ["⚖️ Распределите вес равномерно: нагрузка ≤ 75% capacity", "📉 Node_3 маленький (cap=4) — не перегружайте"],
+        theory: "🔄 Load balancing: планировщик ОС распределяет tasks по CPU/cores для избежания троттлинга и starvation процессов."
+      },
+      {
+        id: 6, title: "Сетевая локальность",
+        rule: "Объект должен размещаться в узле с совпадающим region для задержки <50ms.",
+        objects: [
+          { id:'o19', name:'EU_Users', w:3, region:'EU', type:'Service' },
+          { id:'o20', name:'US_API', w:2, region:'US', type:'Service' },
+          { id:'o21', name:'ASIA_Cache', w:3, region:'ASIA', type:'Storage' }
+        ],
+        nodes: [
+          { id:'nA', name:'DC_Frankfurt', cap:5, types:['Service','Storage'], region:'EU' },
+          { id:'nB', name:'DC_Virginia', cap:5, types:['Service'], region:'US' },
+          { id:'nC', name:'DC_Singapore', cap:6, types:['Storage','Service'], region:'ASIA' }
+        ],
+        hints: ["🌍 Region объекта должен = region узла", "📡 ОС маршрутизирует пакеты через локальные шлюзы"],
+        theory: "🗺️ Network locality: ОС использует ARP/DNS и таблицы маршрутизации для минимизации hop-count и задержки."
+      },
+      {
+        id: 7, title: "Версионная совместимость",
+        rule: "Версия объекта должна поддерживаться средой выполнения узла.",
+        objects: [
+          { id:'o22', name:'Legacy_Module', w:3, ver:'v1', type:'Library' },
+          { id:'o23', name:'Modern_App', w:2, ver:'v2', type:'App' },
+          { id:'o24', name:'Compat_Lib', w:2, ver:'v1', type:'Library' },
+          { id:'o25', name:'New_Service', w:2, ver:'v2', type:'Service' }
+        ],
+        nodes: [
+          { id:'nA', name:'Runtime_v1', cap:5, types:['Library','App'], supportedVer:'v1' },
+          { id:'nB', name:'Runtime_v2', cap:4, types:['App','Service'], supportedVer:'v2' },
+          { id:'nC', name:'Hybrid', cap:6, types:['Library','Service'], supportedVer:'v1' }
+        ],
+        hints: ["📦 v1-объекты → только v1-узлы", "⚠️ Hybrid поддерживает только v1, несмотря на имя"],
+        theory: "📦 ABI compatibility: ОС изолирует зависимости через chroot/containers для предотвращения 'DLL hell' и конфликтов версий."
+      },
+      {
+        id: 8, title: "Приоритеты и QoS",
+        rule: "Объект с priority ≤ QoS класса узла может быть размещён.",
+        objects: [
+          { id:'o26', name:'RealTime_Ctrl', w:2, priority:3, type:'Control' },
+          { id:'o27', name:'Batch_Job', w:3, priority:1, type:'Compute' },
+          { id:'o28', name:'UI_Frontend', w:2, priority:2, type:'Service' }
+        ],
+        nodes: [
+          { id:'nA', name:'QoS_Low', cap:4, qos:1 },
+          { id:'nB', name:'QoS_Medium', cap:5, qos:2 },
+          { id:'nC', name:'QoS_High', cap:6, qos:3 }
+        ],
+        hints: ["🔝 priority 3 требует qos 3 (только QoS_High)", "📦 Batch_Job (pri=1) можно разместить в любой узел"],
+        theory: "⏱️ Real-time scheduling: ОС резервирует CPU/IO для критичных процессов через классы приоритетов (SCHED_FIFO/RR)."
+      },
+      {
+        id: 9, title: "Миграция и исправление",
+        rule: "Объекты уже размещены некорректно. Переместите их, устранив все violations.",
+        objects: [
+          { id:'o29', name:'DB_Core', w:4, type:'Database', priority:2 },
+          { id:'o30', name:'Web_FE', w:2, type:'Service', priority:1 },
+          { id:'o31', name:'Monitor', w:1, type:'Control', priority:1 }
+        ],
+        nodes: [
+          { id:'nA', name:'Heavy_Node', cap:3, types:['Service'], priority:2 },
+          { id:'nB', name:'Balanced', cap:5, types:['Database','Service'], priority:2 },
+          { id:'nC', name:'Light', cap:2, types:['Control','Service'], priority:1 }
+        ],
+        initialAssign: { o29:'nA', o30:'nC', o31:'nB' },
+        hints: ["❌ DB_Core (w=4) > cap Heavy_Node (3) → миграция обязательна", "🎯 Monitor требует Control-тип (есть только в Light)"],
+        theory: "🔄 Live migration: распределённые ОС переносят процессы между хостами без остановки через checkpoint/restore."
+      },
+      {
+        id: 10, title: "Комплексная архитектура",
+        rule: "Учитываются ВСЕ правила: capacity, тип, security, replication, QoS, region.",
+        objects: [
+          { id:'o32', name:'Core_DB', w:3, type:'Database', sec:3, repl:true, region:'EU' },
+          { id:'o33', name:'Replica_DB', w:2, type:'Replicable', sec:3, repl:true, region:'EU' },
+          { id:'o34', name:'API_GW', w:2, type:'Service', sec:1, repl:false, region:'US' },
+          { id:'o35', name:'Cache_EU', w:2, type:'Service', sec:1, repl:false, region:'EU' }
+        ],
+        nodes: [
+          { id:'nA', name:'EU_Secure', cap:5, types:['Database','Replicable'], sec:3, region:'EU', qos:2 },
+          { id:'nB', name:'EU_Public', cap:3, types:['Service'], sec:1, region:'EU', qos:1 },
+          { id:'nC', name:'US_Gateway', cap:4, types:['Service'], sec:1, region:'US', qos:2 }
+        ],
+        hints: ["🔄 Replicables → разные узлы в EU-зоне", "🇺🇸 API_GW строго в US (region constraint)", "🔐 Проверьте sec=3 для Core/Replica"],
+        theory: "🏗️ System design: распределённые ОС объединяют scheduling, replication, security и networking в единую policy engine."
+      }
+    ];
+
+    let currentIdx = 0;
+    let assignments = {};
+    let selectedObj = null;
+    let attempts = 0;
+    let lastErrors = [];
+    let sessionStart = Date.now();
+    let levelResults = [];
+    let currentLevelStart = Date.now();
+
+    const $ = id => document.getElementById(id);
+
+    const formatTime = (ms) => {
+      const totalSec = Math.floor(ms / 1000);
+      const min = Math.floor(totalSec / 60).toString().padStart(2, '0');
+      const sec = (totalSec % 60).toString().padStart(2, '0');
+      return `${min}:${sec}`;
+    };
+
+    const showToast = (msg, type = 'info') => {
+      const toast = $('toast');
+      toast.textContent = msg;
+      toast.className = `toast ${type} show`;
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    };
+
+    const createConfetti = () => {
+      for (let i = 0; i < 30; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.background = ['#2563eb','#10b981','#f59e0b','#ef4444'][Math.floor(Math.random()*4)];
+        c.style.animationDelay = Math.random() * 0.5 + 's';
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3000);
+      }
+    };
+
+    function generateCSV() {
+      const totalAttempts = levelResults.reduce((sum, r) => sum + r.attempts, 0);
+      const completedCount = levelResults.filter(r => r.completed).length;
+      const avgAttempts = completedCount > 0 ? (totalAttempts / completedCount).toFixed(2) : '–';
+      const totalTime = formatTime(Date.now() - sessionStart);
+
+      const meta = [
+        ['ООБД сетевых ресурсов - Результаты'],
+        ['Дисциплина', 'Операционные системы и среды'],
+        ['Дата', new Date().toLocaleString('ru-RU')],
+        ['Всего уровней', '10'],
+        ['Пройдено', completedCount],
+        ['Всего попыток', totalAttempts],
+        ['Среднее попыток/уровень', avgAttempts],
+        ['Общее время', totalTime],
+        [],
+        ['Детализация по уровням']
+      ];
+
+      const headers = ['Уровень', 'Название', 'Статус', 'Попытки', 'Время (сек)', 'Время (формат)', 'Дата завершения'];
+
+      const rows = levelResults.map(r => [
+        r.levelId, r.title,
+        r.completed ? 'Пройден' : 'Не завершён',
+        r.attempts,
+        Math.round(r.timeSpent / 1000),
+        formatTime(r.timeSpent),
+        r.timestamp ? new Date(r.timestamp).toLocaleString('ru-RU') : '–'
+      ]);
+
+      if (currentIdx >= 0 && currentIdx < 10) {
+        const currentLevel = LEVELS[currentIdx];
+        const currentTime = Date.now() - currentLevelStart;
+        rows.push([currentLevel.id, currentLevel.title, 'В процессе', attempts, Math.round(currentTime / 1000), formatTime(currentTime), '–']);
+      }
+
+      const csvRows = [...meta, headers, ...rows];
+      const escapeCSV = (val) => {
+        if (val === null || val === undefined) return '';
+        const str = String(val);
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) return `"${str.replace(/"/g, '""')}"`;
+        return str;
+      };
+      return csvRows.map(row => row.map(escapeCSV).join(',')).join('\n');
+    }
+
+    function showExportPreview() {
+      const csv = generateCSV();
+      $('exportPreview').textContent = csv;
+      $('exportModal').classList.add('active');
+    }
+
+    function downloadCSV() {
+      const csv = generateCSV();
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().slice(0,19).replace(/[:T]/g, '-');
+      link.href = url;
+      link.download = `oodb-results-${timestamp}.csv`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast('📥 Файл скачан!', 'success');
+      $('exportModal').classList.remove('active');
+    }
+
+    function saveLevelResult(completed) {
+      const lv = LEVELS[currentIdx];
+      levelResults.push({ levelId: lv.id, title: lv.title, completed, attempts, timeSpent: Date.now() - currentLevelStart, timestamp: completed ? Date.now() : null });
+      updateStats();
+    }
+
+    function updateStats() {
+      const completed = levelResults.filter(r => r.completed).length;
+      const totalAttempts = levelResults.reduce((sum, r) => sum + r.attempts, 0);
+      const avg = completed > 0 ? (totalAttempts / completed).toFixed(1) : '–';
+      $('statCompleted').textContent = `${completed}/10`;
+      $('statTotalAttempts').textContent = totalAttempts;
+      $('statTime').textContent = formatTime(Date.now() - sessionStart);
+      $('statAvgAttempts').textContent = avg;
+    }
+
+    function render() {
+      const lv = LEVELS[currentIdx];
+      $('levelTitle').textContent = `🧩 ${lv.title}`;
+      $('levelBadge').textContent = `Уровень ${currentIdx + 1}`;
+      $('globalProgress').style.width = `${(currentIdx/10)*100}%`;
+      $('progressText').textContent = `${Math.round((currentIdx/10)*100)}%`;
+      $('theoryBox').textContent = `💡 ${lv.theory}`;
+      $('hintArea').textContent = '';
+      attempts = 0;
+      $('attemptCount').textContent = attempts;
+      assignments = {};
+      selectedObj = null;
+      lastErrors = [];
+      currentLevelStart = Date.now();
+      if (lv.initialAssign) {
+        assignments = {...lv.initialAssign};
+        showToast('⚠️ Уровень начинается с некорректного размещения — исправьте!', 'error');
+      }
+      renderObjects();
+      renderNodes();
+      updateCheckBtn();
+      updateStats();
+      document.querySelector('.container').style.animation = 'none';
+      setTimeout(() => { document.querySelector('.container').style.animation = 'fadeIn 0.4s ease'; }, 10);
+    }
+
+    function renderObjects() {
+      const panel = $('objectsPanel');
+      panel.innerHTML = '';
+      const lv = LEVELS[currentIdx];
+      lv.objects.forEach(o => {
+        const el = document.createElement('div');
+        el.className = `card ${assignments[o.id] ? 'assigned' : ''} ${selectedObj === o.id ? 'selected' : ''}`;
+        el.dataset.id = o.id;
+        const tags = [];
+        if (o.type) tags.push(`<span class="tag type">📦 ${o.type}</span>`);
+        if (o.w) tags.push(`<span class="tag weight">⚖️ ${o.w}</span>`);
+        if (o.sec) tags.push(`<span class="tag sec">🔒 ${o.sec}</span>`);
+        if (o.priority) tags.push(`<span class="tag">🔝 ${o.priority}</span>`);
+        if (o.region) tags.push(`<span class="tag region">🌍 ${o.region}</span>`);
+        if (o.ver) tags.push(`<span class="tag">📦 ${o.ver}</span>`);
+        if (o.repl) tags.push(`<span class="tag">🔄 Repl</span>`);
+        el.innerHTML = `<h3>${o.name}</h3><p>${o.desc || 'Без описания'}</p><div class="tags">${tags.join('')}</div>`;
+        el.onclick = (e) => {
+          e.stopPropagation();
+          selectedObj = selectedObj === o.id ? null : o.id;
+          renderObjects();
+          updateNodeHighlights();
+        };
+        panel.appendChild(el);
+      });
+    }
+
+    function renderNodes() {
+      const panel = $('nodesPanel');
+      panel.innerHTML = '';
+      const lv = LEVELS[currentIdx];
+      lv.nodes.forEach(n => {
+        const assigned = lv.objects.filter(o => assignments[o.id] === n.id);
+        const used = assigned.reduce((s,o) => s + (o.w||0), 0);
+        const pct = n.cap ? Math.min((used / n.cap) * 100, 100) : 0;
+        const over = used > (n.cap || 0);
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.dataset.id = n.id;
+        const info = [];
+        if (n.types) info.push(`Типы: ${n.types.join(', ')}`);
+        if (n.clearance) info.push(`Clear: ${n.clearance}`);
+        if (n.qos) info.push(`QoS: ${n.qos}`);
+        if (n.region) info.push(`🌍 ${n.region}`);
+        if (n.supportedVer) info.push(`📦 ${n.supportedVer}`);
+        if (n.cap) info.push(`Cap: ${n.cap}`);
+        el.innerHTML = `
+          <h3>${n.name}</h3>
+          <p style="font-size:0.75rem; color:var(--muted);">${info.join(' | ')}</p>
+          <div class="progress-node"><div class="progress-node-bar ${over ? 'over' : ''}" style="width:${pct}%"></div></div>
+          <div class="node-stats">Использовано: <strong>${used}/${n.cap||'∞'}</strong>${over ? ' <span style="color:var(--error)">⚠️ Переполнение!</span>' : ''}</div>
+          <div class="assigned-list">${assigned.length ? assigned.map(o => `<span class="mini-tag">${o.name}</span>`).join('') : '<span style="font-size:0.7rem;color:#94a3b8">Пусто</span>'}</div>`;
+        el.onclick = (e) => {
+          e.stopPropagation();
+          if (selectedObj) {
+            if (assignments[selectedObj] === n.id) {
+              delete assignments[selectedObj];
+              showToast('🗑️ Объект снят с узла', 'info');
+            } else {
+              assignments[selectedObj] = n.id;
+              showToast(`✅ ${LEVELS[currentIdx].objects.find(o=>o.id===selectedObj)?.name} → ${n.name}`, 'success');
+            }
+            selectedObj = null;
+            renderObjects();
+            renderNodes();
+            updateCheckBtn();
+          }
+        };
+        panel.appendChild(el);
+      });
+    }
+
+    function updateNodeHighlights() {
+      document.querySelectorAll('.card[data-id]').forEach(card => {
+        if (!card.dataset.id.startsWith('n')) return;
+        card.style.borderColor = '';
+        card.style.boxShadow = '';
+      });
+      if (!selectedObj) return;
+      const lv = LEVELS[currentIdx];
+      const obj = lv.objects.find(o => o.id === selectedObj);
+      if (!obj) return;
+      lv.nodes.forEach(n => {
+        const card = document.querySelector(`.card[data-id="${n.id}"]`);
+        if (!card) return;
+        let compatible = true;
+        if (n.types && obj.type && !n.types.includes(obj.type)) compatible = false;
+        if (n.clearance && obj.sec && obj.sec > n.clearance) compatible = false;
+        if (n.qos && obj.priority && obj.priority > n.qos) compatible = false;
+        if (n.supportedVer && obj.ver && obj.ver !== n.supportedVer) compatible = false;
+        if (n.region && obj.region && n.region !== obj.region) compatible = false;
+        if (compatible) { card.style.borderColor = 'var(--primary)'; card.style.boxShadow = '0 0 0 2px rgba(37,99,235,0.2)'; }
+        else { card.style.borderColor = 'var(--border)'; card.style.boxShadow = 'none'; }
+      });
+    }
+
+    function updateCheckBtn() {
+      const lv = LEVELS[currentIdx];
+      $('checkBtn').disabled = !lv.objects.every(o => assignments[o.id]);
+    }
+
+    function validate() {
+      const lv = LEVELS[currentIdx];
+      const errors = [];
+      const nodeUsage = {};
+      lv.nodes.forEach(n => nodeUsage[n.id] = 0);
+      lv.objects.forEach(o => {
+        const nodeId = assignments[o.id];
+        if (!nodeId) { errors.push({msg: `${o.name} не назначен`, objId: o.id}); return; }
+        const node = lv.nodes.find(n => n.id === nodeId);
+        if (!node) { errors.push({msg: `Неизвестный узел для ${o.name}`, objId: o.id}); return; }
+        nodeUsage[nodeId] += (o.w || 0);
+        if (node.types && o.type && !node.types.includes(o.type)) errors.push({msg: `${o.name} (${o.type}) не поддерживается узлом ${node.name}`, objId: o.id, nodeId: node.id});
+        if (o.sec && node.clearance && o.sec > node.clearance) errors.push({msg: `${o.name} (Sec:${o.sec}) > clearance ${node.name} (${node.clearance})`, objId: o.id, nodeId: node.id});
+        if (o.priority && node.qos && o.priority > node.qos) errors.push({msg: `${o.name} (Pri:${o.priority}) требует QoS ≥ ${o.priority}. В ${node.name} только ${node.qos}`, objId: o.id, nodeId: node.id});
+        if (o.ver && node.supportedVer && o.ver !== node.supportedVer) errors.push({msg: `${o.name} (${o.ver}) несовместим с ${node.name} (${node.supportedVer})`, objId: o.id, nodeId: node.id});
+        if (o.region && node.region && o.region !== node.region) errors.push({msg: `${o.name} (${o.region}) требует локальности. Узел: ${node.region}`, objId: o.id, nodeId: node.id});
+      });
+      for (const [nodeId, used] of Object.entries(nodeUsage)) {
+        const node = lv.nodes.find(n => n.id === nodeId);
+        if (node && node.cap && used > node.cap) errors.push({msg: `Переполнение ${node.name}: ${used}/${node.cap}`, nodeId});
+      }
+      if (lv.id === 5) {
+        for (const [nodeId, used] of Object.entries(nodeUsage)) {
+          const node = lv.nodes.find(n => n.id === nodeId);
+          if (node?.cap && (used / node.cap) > 0.75) errors.push({msg: `${node.name} загружен >75% (${Math.round(used/node.cap*100)}%). Нарушен fair scheduling`, nodeId});
+        }
+      }
+      if ([3, 10].includes(lv.id)) {
+        const replObjs = lv.objects.filter(o => o.repl || o.type === 'Replicable');
+        if (replObjs.length > 1) {
+          const replNodes = replObjs.map(o => assignments[o.id]).filter(Boolean);
+          const uniqueNodes = [...new Set(replNodes)];
+          if (uniqueNodes.length < replObjs.length) replObjs.forEach(o => errors.push({msg: `${o.name} (Replicable) должен быть на отдельном узле для fault-tolerance`, objId: o.id}));
+        }
+      }
+      if (lv.id === 2) {
+        const main = lv.objects.find(o => o.id === 'o4');
+        const replica = lv.objects.find(o => o.id === 'o5');
+        if (main && replica && assignments[main.id] && assignments[replica.id]) {
+          const mainNode = lv.nodes.find(n => n.id === assignments[main.id]);
+          const replNode = lv.nodes.find(n => n.id === assignments[replica.id]);
+          const supportsDb = n => n.types?.includes('Database') || n.types?.includes('Replicable');
+          if (!supportsDb(mainNode) || !supportsDb(replNode)) errors.push({msg: "Main_DB и Replica требуют affinity-узлов с поддержкой Database/Replicable", objId: 'o4,o5'});
+        }
+      }
+      return errors;
+    }
+
+    function highlightErrors(errors) {
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('error-highlight'));
+      errors.forEach(err => {
+        if (err.objId) err.objId.split(',').forEach(id => { const el = document.querySelector(`.card[data-id="${id.trim()}"]`); if (el) el.classList.add('error-highlight'); });
+        if (err.nodeId) { const el = document.querySelector(`.card[data-id="${err.nodeId}"]`); if (el) el.classList.add('error-highlight'); }
+      });
+    }
+
+    $('checkBtn').onclick = () => {
+      attempts++;
+      $('attemptCount').textContent = attempts;
+      const errors = validate();
+      lastErrors = errors;
+      if (errors.length === 0) {
+        $('modalTitle').textContent = '✅ Задание выполнено!';
+        $('modalTitle').style.color = 'var(--success)';
+        $('modalText').innerHTML = `<strong>Отлично!</strong><br><br>Вы корректно распределили ресурсы.<br><br>Попыток: ${attempts} 🎯`;
+        $('nextLevelBtn').disabled = currentIdx >= 9;
+        $('nextLevelBtn').textContent = currentIdx >= 9 ? '🏆 Курс завершён!' : '➡️ Следующее задание';
+        $('nextLevelBtn').className = 'success';
+        $('closeModalBtn').style.display = currentIdx >= 9 ? 'none' : 'inline-flex';
+        createConfetti();
+        showToast('🎉 Уровень пройден!', 'success');
+        saveLevelResult(true);
+      } else {
+        $('modalTitle').textContent = `❌ Найдено ошибок: ${errors.length}`;
+        $('modalTitle').style.color = 'var(--error)';
+        $('modalText').innerHTML = errors.map(e => `• ${e.msg}`).join('<br>');
+        $('nextLevelBtn').disabled = true;
+        $('nextLevelBtn').textContent = '🔙 Исправить';
+        $('closeModalBtn').style.display = 'inline-flex';
+        highlightErrors(errors);
+        showToast('❌ Проверьте подсвеченные элементы', 'error');
+      }
+      $('resultModal').classList.add('active');
+    };
+
+    $('hintBtn').onclick = () => {
+      const hints = LEVELS[currentIdx].hints || [];
+      if (hints.length > 0) {
+        $('hintArea').textContent = '💡 ' + hints[Math.floor(Math.random() * hints.length)];
+        $('hintArea').style.animation = 'none';
+        setTimeout(() => $('hintArea').style.animation = 'slideIn 0.3s ease', 10);
+      }
+    };
+
+    $('resetBtn').onclick = () => { if (confirm('Сбросить текущий уровень?')) { render(); showToast('🔄 Уровень сброшен', 'info'); } };
+
+    $('skipBtn').onclick = () => {
+      if (confirm('Пропустить уровень?')) {
+        saveLevelResult(false);
+        if (currentIdx < 9) { currentIdx++; render(); showToast('⏭ Уровень пропущен', 'info'); }
+      }
+    };
+
+    $('exportBtn').onclick = showExportPreview;
+    $('downloadCsvBtn').onclick = downloadCSV;
+    $('closeExportBtn').onclick = () => $('exportModal').classList.remove('active');
+
+    $('closeModalBtn').onclick = () => {
+      $('resultModal').classList.remove('active');
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('error-highlight'));
+    };
+
+    $('nextLevelBtn').onclick = () => {
+      if (currentIdx < 9) {
+        currentIdx++;
+        $('resultModal').classList.remove('active');
+        setTimeout(render, 200);
+      } else {
+        $('modalTitle').textContent = '🎓 Курс завершён!';
+        $('modalText').innerHTML = `Поздравляем! Вы освоили принципы распределения ООБД.<br><br><strong>📊 Нажмите "Экспорт CSV" для сохранения результатов!</strong>`;
+        $('nextLevelBtn').textContent = '🔄 Начать заново';
+        $('nextLevelBtn').disabled = false;
+        $('nextLevelBtn').onclick = () => { currentIdx = 0; levelResults = []; sessionStart = Date.now(); render(); $('resultModal').classList.remove('active'); showToast('🔄 Новая сессия начата', 'info'); };
+      }
+    };
+
+    $('resultModal').onclick = (e) => { if (e.target === $('resultModal')) { $('resultModal').classList.remove('active'); document.querySelectorAll('.card').forEach(c => c.classList.remove('error-highlight')); } };
+    $('exportModal').onclick = (e) => { if (e.target === $('exportModal')) $('exportModal').classList.remove('active'); };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { selectedObj = null; renderObjects(); updateNodeHighlights(); }
+      if (e.key === 'Enter' && !$('checkBtn').disabled && !$('resultModal').classList.contains('active')) $('checkBtn').click();
+    });
+
+    setInterval(updateStats, 1000);
+    render();
+    showToast('👋 Добро пожаловать! Выбирайте объект → кликайте по узлу', 'success');
+  </script>
+</body>
+</html>

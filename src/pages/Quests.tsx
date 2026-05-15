@@ -2,6 +2,18 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 
+const SPECIAL_QUESTS = [
+  {
+    id: "oodb",
+    icon: "🖥️",
+    title: "ООБД-тренажёр",
+    desc: "10 заданий на распределение объектов по сетевым узлам с учётом capacity, типов, безопасности, QoS и репликации. Экспорт результатов в CSV.",
+    color: "from-slate-600 to-blue-700",
+    count: "10 уровней",
+    path: "/quests/oodb",
+  },
+];
+
 // ── Финансовый навигатор ─────────────────────────────────────────────────────
 const finScenarios = [
   {
@@ -295,6 +307,30 @@ export default function Quests() {
                     <Icon name="ChevronRight" size={20} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-1" />
                   </button>
                 ))}
+
+                <div className="pt-2">
+                  <p className="font-body text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">🎮 Интерактивные тренажёры</p>
+                  {SPECIAL_QUESTS.map((q) => (
+                    <button
+                      key={q.id}
+                      onClick={() => navigate(q.path)}
+                      className="w-full bg-white rounded-3xl shadow-md hover:shadow-xl transition-all p-6 text-left flex items-start gap-5 group active:scale-[0.98]"
+                    >
+                      <span className={`text-4xl w-16 h-16 rounded-2xl bg-gradient-to-br ${q.color} flex items-center justify-center shrink-0 shadow-lg`}>
+                        {q.icon}
+                      </span>
+                      <div className="flex-1">
+                        <div className="font-display text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{q.title}</div>
+                        <p className="font-body text-sm text-muted-foreground leading-relaxed">{q.desc}</p>
+                        <div className="mt-3 flex items-center gap-1.5 text-xs font-body font-semibold text-primary">
+                          <Icon name="Layers" size={12} />
+                          {q.count}
+                        </div>
+                      </div>
+                      <Icon name="ChevronRight" size={20} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-1" />
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
