@@ -49,7 +49,7 @@ function Navbar({ onStart, onAuth, onPayment, onProfile }: { onStart: () => void
         <div className="hidden md:flex items-center gap-3">
           <button onClick={() => navigate("/quests")} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-sm font-body font-semibold text-amber hover:border-amber/40 hover:bg-amber/5 transition-all">
             <Icon name="Swords" size={14} className="text-amber" />
-            Квесты
+            Тренажёры
           </button>
 
           {token ? (
@@ -82,7 +82,7 @@ function Navbar({ onStart, onAuth, onPayment, onProfile }: { onStart: () => void
           ))}
           <div className="pt-2 space-y-2">
             <button onClick={() => { navigate("/quests"); setMenuOpen(false); }} className="w-full py-2.5 text-sm font-body font-semibold border border-amber/30 text-amber rounded-xl flex items-center justify-center gap-2">
-              <Icon name="Swords" size={14} />Квесты
+              <Icon name="Swords" size={14} />Тренажёры
             </button>
 
             {token ? (

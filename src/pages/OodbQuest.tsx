@@ -19,7 +19,7 @@ export default function OodbQuest() {
             className="flex items-center gap-1.5 text-sm font-body text-muted-foreground hover:text-foreground transition-colors"
           >
             <Icon name="ArrowLeft" size={16} />
-            К квестам
+            К тренажёрам
           </button>
         </div>
       </div>

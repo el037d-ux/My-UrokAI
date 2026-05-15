@@ -270,7 +270,7 @@ export default function Quests() {
             className="flex items-center gap-1.5 text-sm font-body text-muted-foreground hover:text-foreground transition-colors"
           >
             <Icon name="ArrowLeft" size={16} />
-            {screen === "lobby" ? "На главную" : "К квестам"}
+            {screen === "lobby" ? "На главную" : "К тренажёрам"}
           </button>
         </div>
       </div>
@@ -283,8 +283,8 @@ export default function Quests() {
             <div className="animate-fade-in">
               <div className="text-center mb-6 sm:mb-8">
                 <div className="text-4xl sm:text-5xl mb-3">🗺️</div>
-                <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">Квесты</h1>
-                <p className="font-body text-sm sm:text-base text-muted-foreground">Выберите квест и проверьте свои знания</p>
+                <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">Тренажёры</h1>
+                <p className="font-body text-sm sm:text-base text-muted-foreground">Выберите тренажёр и проверьте свои знания</p>
               </div>
               <div className="space-y-4">
                 {QUESTS.map((q) => (
@@ -414,7 +414,7 @@ export default function Quests() {
               </div>
               <button onClick={() => setScreen("lobby")}
                 className="w-full py-2.5 rounded-2xl border border-border text-sm font-body text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all">
-                Выбрать другой квест
+                Выбрать другой тренажёр
               </button>
             </div>
           )}
