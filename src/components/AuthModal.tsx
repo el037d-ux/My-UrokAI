@@ -8,11 +8,13 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const { login, register, loading } = useUser();
 
   const handleSubmit = async () => {
     setError("");
     if (!email || !password) { setError("Заполните все поля"); return; }
+    if (mode === "register" && !agreed) { setError("Необходимо согласие на обработку персональных данных"); return; }
     const result = mode === "login"
       ? await login(email, password)
       : await register(email, password, name);
@@ -87,9 +89,25 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
           </button>
 
           {mode === "register" && (
-            <p className="font-body text-xs text-muted-foreground text-center">
-              Регистрируясь, вы получаете 3 урока и 3 игры бесплатно
-            </p>
+            <div className="space-y-2.5">
+              <label className="flex items-start gap-2.5 cursor-pointer group">
+                <div
+                  onClick={() => setAgreed(v => !v)}
+                  className={`mt-0.5 w-4 h-4 flex-shrink-0 rounded border transition-colors ${agreed ? "bg-primary border-primary" : "border-border group-hover:border-primary/50"}`}
+                >
+                  {agreed && <Icon name="Check" size={12} className="text-white m-auto" />}
+                </div>
+                <span className="font-body text-xs text-muted-foreground leading-relaxed">
+                  Я соглашаюсь на{" "}
+                  <a href="/privacy" target="_blank" className="text-primary hover:underline">обработку персональных данных</a>
+                  {" "}в соответствии с{" "}
+                  <a href="/privacy" target="_blank" className="text-primary hover:underline">политикой конфиденциальности</a>
+                </span>
+              </label>
+              <p className="font-body text-xs text-muted-foreground text-center">
+                Регистрируясь, вы получаете 3 урока и 3 игры бесплатно
+              </p>
+            </div>
           )}
         </div>
       </div>
