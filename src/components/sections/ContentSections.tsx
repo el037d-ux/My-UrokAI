@@ -470,33 +470,26 @@ export function WiseMinute() {
   }
 
   return (
-    <section className="py-12 sm:py-16 bg-gradient-to-br from-amber-50 via-orange-50 to-teal-50">
-      <div className="container max-w-2xl mx-auto px-4 sm:px-6">
-        <div className="section-fade text-center mb-6">
-          <span className="inline-block px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-body font-semibold uppercase tracking-wider mb-3">💡 Мудрая минутка</span>
-          <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">Мысль дня</h2>
-        </div>
-
-        <div className="section-fade relative bg-white rounded-3xl shadow-lg border-t-4 border-teal-400 px-8 py-10 text-center">
-          <span className="absolute top-0 left-5 -translate-y-1/2 text-7xl text-orange-200/60 font-serif leading-none select-none">❝</span>
+    <div className="w-full bg-gradient-to-r from-amber-50 via-orange-50 to-teal-50 border-b border-orange-100">
+      <div className="container max-w-6xl mx-auto px-4 sm:px-6 py-2 flex items-center gap-3 justify-between">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <span className="text-base shrink-0">💡</span>
+          <span className="font-body text-xs font-semibold text-orange-700 shrink-0 hidden sm:block">Мудрая минутка:</span>
           <p
-            className="font-body text-base sm:text-lg font-medium text-foreground leading-relaxed min-h-[80px] flex items-center justify-center transition-opacity duration-300"
+            className="font-body text-xs text-muted-foreground leading-snug truncate transition-opacity duration-250"
             style={{ opacity: visible ? 1 : 0 }}
           >
             {WISE_QUOTES[index]}
           </p>
         </div>
-
-        <div className="section-fade flex justify-center mt-6">
-          <button
-            onClick={nextQuote}
-            className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-orange-400 to-orange-300 text-white font-body font-semibold text-sm shadow-md shadow-orange-200 hover:from-orange-500 hover:to-orange-400 hover:shadow-orange-300 hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
-          >
-            💡 Совет дня
-          </button>
-        </div>
+        <button
+          onClick={nextQuote}
+          className="shrink-0 px-3 py-1 rounded-lg bg-orange-100 text-orange-700 font-body font-semibold text-xs hover:bg-orange-200 active:scale-95 transition-all duration-200 whitespace-nowrap"
+        >
+          Ещё →
+        </button>
       </div>
-    </section>
+    </div>
   );
 }
 

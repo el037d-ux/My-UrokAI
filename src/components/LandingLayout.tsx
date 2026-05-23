@@ -17,11 +17,11 @@ type Props = {
 export default function LandingLayout({ onStart, onGame, onAnalysis, onAuth, onPayment, onProfile, lessonsLeft, gamesLeft, isPaid }: Props) {
   return (
     <>
+      <WiseMinute />
       <Navbar onStart={onStart} onAuth={onAuth} onPayment={onPayment} onProfile={onProfile} />
       <Hero onStart={onStart} onGame={onGame} onAnalysis={onAnalysis} onPayment={onPayment} lessonsLeft={lessonsLeft} gamesLeft={gamesLeft} isPaid={isPaid} />
       <About />
       <ChatDemo onPayment={onPayment} />
-      <WiseMinute />
       <FAQ />
       <CTA onStart={onStart} onPayment={onPayment} />
       <Contacts />
