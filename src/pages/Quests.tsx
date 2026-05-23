@@ -222,6 +222,85 @@ const QUESTS = [
   },
 ];
 
+// ── Вспомогательные компоненты лобби ─────────────────────────────────────────
+
+function CategoryFolder({
+  emoji, title, color, children, empty,
+}: {
+  emoji: string;
+  title: string;
+  color: string;
+  children?: React.ReactNode;
+  empty?: boolean;
+}) {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="bg-white rounded-3xl shadow-md overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-3 px-5 py-4 hover:bg-slate-50 transition-colors"
+      >
+        <span className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-xl shrink-0 shadow-md`}>
+          {emoji}
+        </span>
+        <span className="font-display text-base font-bold text-foreground flex-1 text-left">{title}</span>
+        <Icon name={open ? "ChevronUp" : "ChevronDown"} size={18} className="text-muted-foreground shrink-0" />
+      </button>
+      {open && (
+        <div className="px-4 pb-4 space-y-2 border-t border-border/50">
+          {empty ? (
+            <p className="font-body text-sm text-muted-foreground text-center py-4">Скоро появятся тренажёры</p>
+          ) : children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SpecialCard({ q, navigate }: { q: typeof SPECIAL_QUESTS[0]; navigate: (path: string) => void }) {
+  return (
+    <button
+      onClick={() => navigate(q.path)}
+      className="w-full bg-slate-50 hover:bg-slate-100 rounded-2xl transition-all p-4 text-left flex items-center gap-4 group active:scale-[0.98] mt-2"
+    >
+      <span className={`text-2xl w-12 h-12 rounded-xl bg-gradient-to-br ${q.color} flex items-center justify-center shrink-0 shadow-md`}>
+        {q.icon}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">{q.title}</div>
+        <p className="font-body text-xs text-muted-foreground leading-relaxed line-clamp-2 mt-0.5">{q.desc}</p>
+        <div className="mt-1.5 flex items-center gap-1 text-xs font-body font-semibold text-primary">
+          <Icon name="Layers" size={11} />
+          {q.count}
+        </div>
+      </div>
+      <Icon name="ChevronRight" size={16} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+    </button>
+  );
+}
+
+function NavCard({ q, onStart }: { q: typeof QUESTS[0]; onStart: () => void }) {
+  return (
+    <button
+      onClick={onStart}
+      className="w-full bg-slate-50 hover:bg-slate-100 rounded-2xl transition-all p-4 text-left flex items-center gap-4 group active:scale-[0.98] mt-2"
+    >
+      <span className={`text-2xl w-12 h-12 rounded-xl bg-gradient-to-br ${q.color} flex items-center justify-center shrink-0 shadow-md`}>
+        {q.icon}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">{q.title}</div>
+        <p className="font-body text-xs text-muted-foreground leading-relaxed line-clamp-2 mt-0.5">{q.desc}</p>
+        <div className="mt-1.5 flex items-center gap-1 text-xs font-body font-semibold text-primary">
+          <Icon name="Play" size={11} />
+          5 вопросов
+        </div>
+      </div>
+      <Icon name="ChevronRight" size={16} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+    </button>
+  );
+}
+
 type Screen = "lobby" | "play" | "result";
 
 const feedbackStyle = {
@@ -302,53 +381,57 @@ export default function Quests() {
               <div className="text-center mb-6 sm:mb-8">
                 <div className="text-4xl sm:text-5xl mb-3">🗺️</div>
                 <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">Тренажёры</h1>
-                <p className="font-body text-sm sm:text-base text-muted-foreground">Выберите тренажёр и проверьте свои знания</p>
+                <p className="font-body text-sm sm:text-base text-muted-foreground">Выберите предмет и начните тренировку</p>
               </div>
-              <div className="space-y-4">
-                {QUESTS.map((q) => (
-                  <button
-                    key={q.id}
-                    onClick={() => startQuest(q.id)}
-                    className="w-full bg-white rounded-3xl shadow-md hover:shadow-xl transition-all p-6 text-left flex items-start gap-5 group active:scale-[0.98]"
-                  >
-                    <span className={`text-4xl w-16 h-16 rounded-2xl bg-gradient-to-br ${q.color} flex items-center justify-center shrink-0 shadow-lg`}>
-                      {q.icon}
-                    </span>
-                    <div className="flex-1">
-                      <div className="font-display text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{q.title}</div>
-                      <p className="font-body text-sm text-muted-foreground leading-relaxed">{q.desc}</p>
-                      <div className="mt-3 flex items-center gap-1.5 text-xs font-body font-semibold text-primary">
-                        <Icon name="Play" size={12} />
-                        5 вопросов
-                      </div>
-                    </div>
-                    <Icon name="ChevronRight" size={20} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-1" />
-                  </button>
-                ))}
 
-                <div className="pt-2">
-                  <p className="font-body text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">🎮 Интерактивные тренажёры</p>
-                  {SPECIAL_QUESTS.map((q) => (
-                    <button
-                      key={q.id}
-                      onClick={() => navigate(q.path)}
-                      className="w-full bg-white rounded-3xl shadow-md hover:shadow-xl transition-all p-6 text-left flex items-start gap-5 group active:scale-[0.98]"
-                    >
-                      <span className={`text-4xl w-16 h-16 rounded-2xl bg-gradient-to-br ${q.color} flex items-center justify-center shrink-0 shadow-lg`}>
-                        {q.icon}
-                      </span>
-                      <div className="flex-1">
-                        <div className="font-display text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{q.title}</div>
-                        <p className="font-body text-sm text-muted-foreground leading-relaxed">{q.desc}</p>
-                        <div className="mt-3 flex items-center gap-1.5 text-xs font-body font-semibold text-primary">
-                          <Icon name="Layers" size={12} />
-                          {q.count}
-                        </div>
-                      </div>
-                      <Icon name="ChevronRight" size={20} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-1" />
-                    </button>
+              <div className="space-y-6">
+
+                {/* Информационные системы */}
+                <CategoryFolder
+                  emoji="🖥️"
+                  title="Информационные системы"
+                  color="from-slate-600 to-blue-700"
+                >
+                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "oodb")!} navigate={navigate} />
+                </CategoryFolder>
+
+                {/* Информатика */}
+                <CategoryFolder
+                  emoji="💻"
+                  title="Информатика"
+                  color="from-violet-600 to-purple-700"
+                >
+                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "information-work")!} navigate={navigate} />
+                </CategoryFolder>
+
+                {/* Математика */}
+                <CategoryFolder
+                  emoji="📐"
+                  title="Математика"
+                  color="from-orange-500 to-amber-600"
+                  empty
+                />
+
+                {/* Проектный менеджмент */}
+                <CategoryFolder
+                  emoji="🧭"
+                  title="Проектный менеджмент"
+                  color="from-indigo-500 to-violet-600"
+                >
+                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "smart-goals")!} navigate={navigate} />
+                </CategoryFolder>
+
+                {/* Метапредмет */}
+                <CategoryFolder
+                  emoji="🌐"
+                  title="Метапредмет"
+                  color="from-teal-500 to-emerald-600"
+                >
+                  {QUESTS.map((q) => (
+                    <NavCard key={q.id} q={q} onStart={() => startQuest(q.id)} />
                   ))}
-                </div>
+                </CategoryFolder>
+
               </div>
             </div>
           )}
