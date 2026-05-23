@@ -15,6 +15,7 @@ import OodbQuest from "./pages/OodbQuest";
 import InformationWorkQuest from "./pages/InformationWorkQuest";
 import SmartGoalsQuest from "./pages/SmartGoalsQuest";
 import MathLogarithmsQuest from "./pages/MathLogarithmsQuest";
+import ArrayTrainerQuest from "./pages/ArrayTrainerQuest";
 import { UserProvider } from "./context/UserContext";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/quests/information-work" element={<InformationWorkQuest />} />
             <Route path="/quests/smart-goals" element={<SmartGoalsQuest />} />
             <Route path="/quests/math-logarithms" element={<MathLogarithmsQuest />} />
+            <Route path="/quests/array-trainer" element={<ArrayTrainerQuest />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

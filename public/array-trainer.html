@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кинестетический тренажер: работа с массивом</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --card-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      --compare: #ffd166;
+      --swap: #ef476f;
+      --process: #06d6a0;
+      --selected: #118ab2;
+      --text: #2b2d42;
+      --btn: #073b4c;
+      --btn-hover: #118ab2;
+      --log-bg: #e9ecef;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-highlight: #f9e2af;
+      --progress-bg: #e0e0e0;
+      --progress-fill: #118ab2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { max-width: 1000px; width: 100%; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+
+    h1 { text-align: center; margin-bottom: 16px; font-size: 1.5rem; color: var(--btn); }
+    .subtitle { text-align: center; color: #666; margin-bottom: 20px; font-size: 0.95rem; }
+
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; background: var(--log-bg); padding: 12px; border-radius: 10px; }
+    button, select { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: 0.2s; font-size: 0.9rem; }
+    button { background: var(--btn); color: white; }
+    button:hover:not(:disabled) { background: var(--btn-hover); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.secondary { background: #6c757d; }
+    button.secondary:hover { background: #5a6268; }
+    select { background: white; border: 1px solid #ccc; }
+    .speed-control { display: flex; align-items: center; gap: 6px; margin-left: auto; font-size: 0.85rem; }
+    input[type="range"] { width: 90px; }
+
+    .progress-wrap { margin: 12px 0; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: #555; margin-bottom: 4px; }
+    .progress-bar { height: 8px; background: var(--progress-bg); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--progress-fill); width: 0%; transition: width 0.3s; }
+
+    .array-section { margin: 20px 0; }
+    .array-header { display: flex; justify-content: center; gap: 12px; margin-bottom: 8px; font-weight: 600; color: #555; font-size: 0.85rem; }
+    .array-area { min-height: 150px; display: flex; justify-content: center; align-items: flex-end; gap: 10px; padding: 16px 0; border: 2px dashed #ccc; border-radius: 10px; background: #fafafa; }
+
+    .card {
+      width: 56px; height: 85px;
+      background: var(--card-bg);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      border: 2px solid transparent;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
+
+    .card-index { position: absolute; top: -22px; font-size: 0.75rem; color: #666; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; }
+    .card-value { font-size: 1.3rem; margin-top: 18px; }
+    .card-compare { position: absolute; bottom: -24px; font-size: 0.7rem; color: #333; background: white; padding: 2px 5px; border-radius: 3px; border: 1px solid #ddd; white-space: nowrap; }
+
+    .card.comparing { background: var(--compare); border-color: #e0b84a; box-shadow: 0 0 0 3px rgba(255,209,102,0.4); }
+    .card.swapping { background: var(--swap); color: white; transform: scale(1.1); z-index: 20; animation: pulse 0.4s ease; }
+    @keyframes pulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.15)} }
+    .card.processing { background: var(--process); color: white; }
+    .card.selected { background: var(--selected); color: white; border-color: #0a6a82; transform: translateY(-8px) scale(1.08); }
+    .card.done { background: #8ac926; color: white; }
+    .card.moving { transition: transform 0.4s ease-in-out; z-index: 15; }
+
+    .code-section { margin: 16px 0; background: var(--code-bg); border-radius: 10px; padding: 12px; }
+    .code-title { color: #a6adc8; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .pseudocode { font-family: 'Consolas', monospace; font-size: 0.85rem; color: var(--code-text); line-height: 1.6; }
+    .pseudocode-line { padding: 2px 8px; border-radius: 4px; display: block; }
+    .pseudocode-line.active { background: var(--code-highlight); color: #1e1e2e; font-weight: 600; }
+    .pseudocode-comment { color: #6c7086; font-style: italic; }
+
+    .log-panel { background: var(--log-bg); padding: 12px; border-radius: 10px; height: 140px; overflow-y: auto; font-family: 'Consolas', monospace; font-size: 0.9rem; line-height: 1.5; }
+    .log-panel p { margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #ddd; }
+    .log-panel p:last-child { border-bottom: none; }
+
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; margin-right: 5px; font-weight: 600; }
+    .badge.c { background: var(--compare); color: #333; }
+    .badge.s { background: var(--swap); color: white; }
+    .badge.p { background: var(--process); color: white; }
+    .badge.m { background: var(--selected); color: white; }
+    .badge.i { background: #94a3b8; color: white; }
+
+    .hint { font-size: 0.8rem; color: #666; margin-top: 10px; text-align: center; font-style: italic; }
+    .comparison-result { text-align: center; margin: 8px 0; font-weight: 600; padding: 6px 12px; border-radius: 6px; min-height: 24px; }
+    .comparison-result.yes { background: #d4edda; color: #155724; }
+    .comparison-result.no { background: #f8d7da; color: #721c24; }
+    .comparison-result.hidden { display: none; }
+
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; padding: 20px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .modal-title { font-weight: bold; margin-bottom: 12px; font-size: 1.1rem; }
+    .modal-close { float: right; cursor: pointer; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧮 Тренажер: работа с массивом</h1>
+    <p class="subtitle">Визуализация сортировки и поэлементной обработки с пошаговым объяснением</p>
+
+    <div class="controls">
+      <button id="generate">🎲 Новый массив</button>
+      <select id="algorithm">
+        <option value="bubble">🫧 Пузырьковая сортировка</option>
+        <option value="process">🔄 Обработка: +10 к каждому</option>
+        <option value="find-max">🔍 Поиск максимума</option>
+      </select>
+      <button id="run">▶ Старт</button>
+      <button id="pause" class="secondary" disabled>⏸ Пауза</button>
+      <button id="step">⏭ Шаг</button>
+      <button id="explain">💡 Объяснить</button>
+      <button id="manual">✋ Ручной режим</button>
+      <button id="reset">↺ Сброс</button>
+      <div class="speed-control">
+        <span>⏱</span>
+        <input type="range" id="speed" min="200" max="1500" value="700">
+        <span id="speedVal">700 мс</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Прогресс:</span>
+        <span id="progressText">0 / 0 шагов</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="array-section">
+      <div class="array-header" id="indexHeader"></div>
+      <div class="array-area" id="arrayContainer"></div>
+      <div class="comparison-result hidden" id="compareResult"></div>
+    </div>
+
+    <div class="code-section">
+      <div class="code-title">📜 Псевдокод <span class="pseudocode-comment">(подсвечивается текущая строка)</span></div>
+      <div class="pseudocode" id="pseudoCode"></div>
+    </div>
+
+    <div class="log-panel" id="logPanel">
+      <p>📋 Нажмите «Новый массив», затем выберите алгоритм и начните выполнение...</p>
+    </div>
+
+    <div class="hint" id="modeHint">Режим: Автоматический • Клик по карточке в ручном режиме позволяет менять элементы местами</div>
+  </div>
+
+  <div class="modal" id="explainModal">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <div class="modal-title" id="modalTitle">Объяснение шага</div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      baseArr: [], workArr: [], steps: [], currentStep: 0,
+      isRunning: false, isPaused: false, manualMode: false,
+      selectedCard: null, speed: 700, currentExplanation: null
+    };
+
+    const dom = {
+      container: document.getElementById('arrayContainer'),
+      indexHeader: document.getElementById('indexHeader'),
+      log: document.getElementById('logPanel'),
+      pseudo: document.getElementById('pseudoCode'),
+      progressFill: document.getElementById('progressFill'),
+      progressText: document.getElementById('progressText'),
+      compareResult: document.getElementById('compareResult'),
+      speedSlider: document.getElementById('speed'),
+      speedVal: document.getElementById('speedVal'),
+      modeHint: document.getElementById('modeHint'),
+      modal: document.getElementById('explainModal'),
+      modalBody: document.getElementById('modalBody'),
+      modalTitle: document.getElementById('modalTitle')
+    };
+
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    const addLog = (message, type = '') => {
+      const p = document.createElement('p');
+      if (type) {
+        const badge = document.createElement('span');
+        badge.className = `badge ${type}`;
+        badge.textContent = type.toUpperCase();
+        p.appendChild(badge);
+        p.appendChild(document.createTextNode(message));
+      } else {
+        p.textContent = message;
+      }
+      dom.log.prepend(p);
+      dom.log.scrollTop = 0;
+    };
+
+    const updateProgress = () => {
+      const total = state.steps.length || 1;
+      const percent = (state.currentStep / total) * 100;
+      dom.progressFill.style.width = `${percent}%`;
+      dom.progressText.textContent = `${state.currentStep} / ${total} шагов`;
+    };
+
+    const showComparison = (a, b, operator, result) => {
+      dom.compareResult.className = `comparison-result ${result ? 'yes' : 'no'}`;
+      dom.compareResult.textContent = `${a} ${operator} ${b}? ${result ? '✅ Да' : '❌ Нет'}`;
+      dom.compareResult.classList.remove('hidden');
+    };
+
+    const hideComparison = () => { dom.compareResult.classList.add('hidden'); };
+
+    const renderArray = (highlights = {}) => {
+      dom.container.innerHTML = '';
+      dom.indexHeader.innerHTML = '';
+      state.workArr.forEach((value, index) => {
+        const indexLabel = document.createElement('div');
+        indexLabel.className = 'card-index';
+        indexLabel.textContent = `[${index}]`;
+        dom.indexHeader.appendChild(indexLabel);
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        if (highlights[index]) card.classList.add(highlights[index]);
+        if (state.manualMode && state.selectedCard === index) card.classList.add('selected');
+
+        card.innerHTML = `<div class="card-value">${value}</div>`;
+        if (highlights.compareText && highlights[index] === 'comparing') {
+          const compareBadge = document.createElement('div');
+          compareBadge.className = 'card-compare';
+          compareBadge.textContent = highlights.compareText[index] || '';
+          card.appendChild(compareBadge);
+        }
+        card.addEventListener('click', () => handleCardClick(index));
+        dom.container.appendChild(card);
+      });
+    };
+
+    const renderPseudoCode = (algorithm, activeLine = -1) => {
+      const codes = {
+        bubble: [
+          '<span class="pseudocode-comment">// Пузырьковая сортировка по возрастанию</span>',
+          'for i = 0 to n-2:',
+          '  for j = 0 to n-i-2:',
+          '    if arr[j] > arr[j+1]:',
+          '      swap(arr[j], arr[j+1])',
+          '<span class="pseudocode-comment">// Конец сортировки</span>'
+        ],
+        process: [
+          '<span class="pseudocode-comment">// Поэлементная обработка массива</span>',
+          'for i = 0 to n-1:',
+          '  arr[i] = arr[i] + 10',
+          '<span class="pseudocode-comment">// Обработка завершена</span>'
+        ],
+        'find-max': [
+          '<span class="pseudocode-comment">// Поиск максимального элемента</span>',
+          'max = arr[0]',
+          'maxIndex = 0',
+          'for i = 1 to n-1:',
+          '  if arr[i] > max:',
+          '    max = arr[i]',
+          '    maxIndex = i',
+          '<span class="pseudocode-comment">// Результат: max, maxIndex</span>'
+        ]
+      };
+      const lines = codes[algorithm] || [];
+      dom.pseudo.innerHTML = lines.map((line, idx) =>
+        `<span class="pseudocode-line ${idx === activeLine ? 'active' : ''}">${line}</span>`
+      ).join('');
+    };
+
+    const generateSteps = () => {
+      state.steps = [];
+      state.workArr = [...state.baseArr];
+      state.currentStep = 0;
+      const algo = document.getElementById('algorithm').value;
+      renderPseudoCode(algo);
+      if (algo === 'bubble') generateBubbleSteps();
+      else if (algo === 'process') generateProcessSteps();
+      else if (algo === 'find-max') generateFindMaxSteps();
+      updateProgress();
+      addLog(`✅ Сгенерировано ${state.steps.length} шагов для алгоритма "${algo}"`, 'i');
+    };
+
+    const generateBubbleSteps = () => {
+      const n = state.workArr.length;
+      let tempArr = [...state.workArr];
+      for (let i = 0; i < n - 1; i++) {
+        for (let j = 0; j < n - i - 1; j++) {
+          state.steps.push({ type: 'compare', indices: [j, j+1], values: [tempArr[j], tempArr[j+1]], pseudoLine: 3, message: `Сравнение: arr[${j}]=${tempArr[j]} и arr[${j+1}]=${tempArr[j+1]}`, compareText: { [j]: `${tempArr[j]}>`, [j+1]: `${tempArr[j+1]}?` } });
+          const shouldSwap = tempArr[j] > tempArr[j+1];
+          state.steps.push({ type: shouldSwap ? 'swap' : 'no-swap', indices: [j, j+1], values: [tempArr[j], tempArr[j+1]], result: shouldSwap, pseudoLine: shouldSwap ? 4 : 3, message: shouldSwap ? `arr[${j}] > arr[${j+1}] → ОБМЕН` : `arr[${j}] ≤ arr[${j+1}] → без обмена`, compareText: { [j]: `${tempArr[j]}>`, [j+1]: `${tempArr[j+1]}?` } });
+          if (shouldSwap) [tempArr[j], tempArr[j+1]] = [tempArr[j+1], tempArr[j]];
+        }
+      }
+      state.steps.push({ type: 'done', pseudoLine: 5, message: '✅ Сортировка завершена! Массив упорядочен по возрастанию.' });
+    };
+
+    const generateProcessSteps = () => {
+      for (let i = 0; i < state.workArr.length; i++) {
+        const oldVal = state.workArr[i];
+        state.steps.push({ type: 'process', indices: [i], values: [oldVal], newValue: oldVal + 10, pseudoLine: 2, message: `arr[${i}]: ${oldVal} + 10 = ${oldVal + 10}` });
+      }
+      state.steps.push({ type: 'done', pseudoLine: 3, message: '✅ Обработка завершена! Все элементы увеличены на 10.' });
+    };
+
+    const generateFindMaxSteps = () => {
+      let currentMax = state.workArr[0];
+      let maxIdx = 0;
+      state.steps.push({ type: 'init', indices: [0], values: [currentMax], pseudoLine: 1, message: `Инициализация: max = arr[0] = ${currentMax}` });
+      for (let i = 1; i < state.workArr.length; i++) {
+        state.steps.push({ type: 'compare', indices: [i], values: [state.workArr[i], currentMax], pseudoLine: 4, message: `Сравнение: arr[${i}]=${state.workArr[i]} с текущим max=${currentMax}` });
+        if (state.workArr[i] > currentMax) {
+          currentMax = state.workArr[i]; maxIdx = i;
+          state.steps.push({ type: 'update-max', indices: [i], values: [currentMax], pseudoLine: 5, message: `✅ Новый максимум: arr[${i}] = ${currentMax}` });
+        } else {
+          state.steps.push({ type: 'keep-max', pseudoLine: 4, message: `❌ arr[${i}] ≤ max → максимум не изменился` });
+        }
+      }
+      state.steps.push({ type: 'done', pseudoLine: 7, message: `✅ Результат: max = ${currentMax} на позиции [${maxIdx}]` });
+    };
+
+    const executeStep = async (step) => {
+      if (step.pseudoLine !== undefined) renderPseudoCode(document.getElementById('algorithm').value, step.pseudoLine);
+      const highlights = {};
+      if (step.indices) {
+        step.indices.forEach(idx => {
+          highlights[idx] = step.type === 'compare' ? 'comparing' : step.type === 'swap' ? 'swapping' : step.type === 'process' ? 'processing' : step.type === 'update-max' ? 'selected' : '';
+        });
+      }
+      if (step.compareText) highlights.compareText = step.compareText;
+      renderArray(highlights);
+      if (step.type === 'compare' && step.values?.length === 2) showComparison(step.values[0], step.values[1], '>', step.result);
+      else if (step.type === 'swap' || step.type === 'no-swap') showComparison(step.values[0], step.values[1], '>', step.result);
+      else hideComparison();
+      if (step.type === 'swap' && step.indices?.length === 2) {
+        const [i, j] = step.indices;
+        [state.workArr[i], state.workArr[j]] = [state.workArr[j], state.workArr[i]];
+      } else if (step.type === 'process' && step.indices?.[0] !== undefined) {
+        state.workArr[step.indices[0]] = step.newValue;
+      }
+      addLog(step.message, step.type === 'compare' ? 'c' : step.type === 'swap' ? 's' : step.type === 'process' ? 'p' : step.type === 'update-max' ? 'm' : 'i');
+      state.currentExplanation = { ...step, arrayState: [...state.workArr] };
+      if (step.type === 'done') {
+        const doneHighlights = {};
+        state.workArr.forEach((_, idx) => doneHighlights[idx] = 'done');
+        renderArray(doneHighlights);
+        hideComparison();
+      } else {
+        renderArray(highlights);
+      }
+      updateProgress();
+    };
+
+    const handleCardClick = (index) => {
+      if (!state.manualMode) return;
+      if (state.selectedCard === null) {
+        state.selectedCard = index;
+        addLog(`👆 Выбран элемент [${index}] = ${state.workArr[index]}`, 'm');
+        renderArray();
+      } else if (state.selectedCard !== index) {
+        const [i, j] = [state.selectedCard, index];
+        [state.workArr[i], state.workArr[j]] = [state.workArr[j], state.workArr[i]];
+        addLog(`🔄 Ручной обмен: arr[${i}] ↔ arr[${j}]`, 's');
+        state.steps = []; state.currentStep = 0; state.selectedCard = null;
+        renderArray(); updateProgress();
+      } else {
+        state.selectedCard = null;
+        renderArray();
+      }
+    };
+
+    const startAutoRun = async () => {
+      if (state.steps.length === 0) { addLog('⚠ Сначала сгенерируйте массив и выберите алгоритм!', 'i'); return; }
+      state.isRunning = true; state.isPaused = false;
+      document.getElementById('run').disabled = true;
+      document.getElementById('pause').disabled = false;
+      while (state.currentStep < state.steps.length && state.isRunning) {
+        while (state.isPaused && state.isRunning) await delay(100);
+        if (!state.isRunning) break;
+        await executeStep(state.steps[state.currentStep]);
+        state.currentStep++;
+        await delay(state.speed);
+      }
+      state.isRunning = false;
+      document.getElementById('run').disabled = false;
+      document.getElementById('pause').disabled = true;
+    };
+
+    const resetState = () => {
+      state.workArr = [...state.baseArr]; state.steps = []; state.currentStep = 0;
+      state.isRunning = false; state.isPaused = false; state.manualMode = false;
+      state.selectedCard = null; state.currentExplanation = null;
+      hideComparison();
+      renderArray();
+      renderPseudoCode(document.getElementById('algorithm').value);
+      updateProgress();
+      dom.modeHint.textContent = 'Режим: Автоматический';
+      document.getElementById('manual').textContent = '✋ Ручной режим';
+    };
+
+    document.getElementById('generate').onclick = () => {
+      state.baseArr = Array.from({length: 8}, () => Math.floor(Math.random() * 40) + 10);
+      resetState();
+      generateSteps();
+      addLog(`🎲 Массив сгенерирован: [${state.baseArr.join(', ')}]`, 'i');
+    };
+
+    document.getElementById('reset').onclick = () => { resetState(); addLog('↺ Состояние сброшено к исходному массиву', 'i'); };
+
+    document.getElementById('algorithm').onchange = () => {
+      if (state.baseArr.length > 0) {
+        generateSteps(); renderArray();
+        addLog(`🔄 Выбран алгоритм: ${document.getElementById('algorithm').options[document.getElementById('algorithm').selectedIndex].text}`, 'i');
+      }
+    };
+
+    document.getElementById('run').onclick = () => startAutoRun();
+
+    document.getElementById('pause').onclick = () => {
+      state.isPaused = !state.isPaused;
+      document.getElementById('pause').textContent = state.isPaused ? '▶ Продолжить' : '⏸ Пауза';
+      addLog(state.isPaused ? '⏸ Выполнение приостановлено' : '▶ Выполнение продолжено', 'i');
+    };
+
+    document.getElementById('step').onclick = () => {
+      if (state.currentStep < state.steps.length) { executeStep(state.steps[state.currentStep]); state.currentStep++; }
+      else addLog('⏸ Все шаги выполнены. Сгенерируйте новый массив или выберите другой алгоритм.', 'i');
+    };
+
+    document.getElementById('explain').onclick = () => {
+      if (!state.currentExplanation) { addLog('💡 Нет текущего шага для объяснения. Выполните хотя бы один шаг.', 'i'); return; }
+      const step = state.currentExplanation;
+      dom.modalTitle.textContent = `Объяснение: ${step.type.toUpperCase()}`;
+      let explanation = `<p><strong>Шаг ${state.currentStep} из ${state.steps.length}</strong></p>`;
+      explanation += `<p><strong>Действие:</strong> ${step.message}</p>`;
+      if (step.type === 'compare') {
+        explanation += `<p><strong>Логика:</strong> Алгоритм сравнивает два соседних элемента, чтобы определить их порядок.</p>`;
+        explanation += `<p><strong>Результат:</strong> ${step.values?.[0]} ${step.result ? '>' : '≤'} ${step.values?.[1]} → ${step.result ? 'требуется обмен' : 'порядок верный'}</p>`;
+      } else if (step.type === 'swap') {
+        explanation += `<p><strong>Логика:</strong> Если левый элемент больше правого, они меняются местами для упорядочивания.</p>`;
+        explanation += `<p><strong>Эффект:</strong> Больший элемент «всплывает» к концу массива (как пузырь).</p>`;
+      } else if (step.type === 'process') {
+        explanation += `<p><strong>Логика:</strong> Поэлементная обработка применяет одну и ту же операцию ко всем элементам массива.</p>`;
+        explanation += `<p><strong>Применение:</strong> Используется для масштабирования данных, нормализации, преобразования единиц измерения.</p>`;
+      }
+      explanation += `<p><strong>Состояние массива:</strong> [${step.arrayState?.join(', ') || state.workArr.join(', ')}]</p>`;
+      dom.modalBody.innerHTML = explanation;
+      dom.modal.classList.add('active');
+    };
+
+    document.getElementById('modalClose').onclick = () => dom.modal.classList.remove('active');
+    dom.modal.onclick = (e) => { if (e.target === dom.modal) dom.modal.classList.remove('active'); };
+
+    document.getElementById('manual').onclick = (e) => {
+      state.manualMode = !state.manualMode;
+      state.selectedCard = null;
+      e.target.textContent = state.manualMode ? '🖐 Выйти из ручного режима' : '✋ Ручной режим';
+      dom.modeHint.textContent = state.manualMode ? 'Режим: Ручной • Кликните по двум карточкам, чтобы поменять их местами' : 'Режим: Автоматический';
+      if (state.manualMode && state.isRunning) {
+        state.isRunning = false;
+        document.getElementById('run').disabled = false;
+        document.getElementById('pause').disabled = true;
+        addLog('✋ Автоматическое выполнение остановлено. Включён ручной режим.', 'i');
+      }
+      renderArray();
+    };
+
+    dom.speedSlider.oninput = (e) => {
+      state.speed = parseInt(e.target.value);
+      dom.speedVal.textContent = state.speed + ' мс';
+    };
+
+    document.getElementById('generate').click();
+    setTimeout(() => {
+      addLog('💡 Совет: начните с пошагового выполнения (кнопка ⏭), чтобы увидеть, как работает алгоритм.', 'i');
+    }, 500);
+  </script>
+</body>
+</html>

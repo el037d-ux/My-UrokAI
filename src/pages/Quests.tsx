@@ -13,6 +13,15 @@ const SPECIAL_QUESTS = [
     path: "/quests/oodb",
   },
   {
+    id: "array-trainer",
+    icon: "🧮",
+    title: "Работа с массивом",
+    desc: "Визуализация сортировки и поэлементной обработки. Пузырьковая сортировка, поиск максимума, пошаговый режим и ручное управление обменом элементов.",
+    color: "from-cyan-600 to-teal-700",
+    count: "3 алгоритма",
+    path: "/quests/array-trainer",
+  },
+  {
     id: "information-work",
     icon: "📊",
     title: "Работа с информацией",
@@ -402,6 +411,7 @@ export default function Quests() {
                   color="from-slate-600 to-blue-700"
                 >
                   <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "oodb")!} navigate={navigate} />
+                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "array-trainer")!} navigate={navigate} />
                 </CategoryFolder>
 
                 {/* Информатика */}
