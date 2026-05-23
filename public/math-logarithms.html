@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Логарифмы + Информатика</title>
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #00B894;
+            --bg: #F0F2F5;
+            --card-bg: #FFFFFF;
+            --text: #2D3436;
+            --correct: #00B894;
+            --wrong: #D63031;
+            --info-bg: #E3F2FD;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), #8B5CF6);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .timer-box {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+        }
+
+        .screen {
+            padding: 30px;
+            text-align: center;
+            transition: opacity 0.3s;
+        }
+
+        .hidden { display: none !important; }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #636E72;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .integration-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--info-bg);
+            color: #1976D2;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 2px solid #90CAF9;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, var(--secondary), #FF8A80);
+            color: white;
+            border: none;
+            padding: 16px 45px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 101, 132, 0.4);
+            transition: transform 0.2s;
+            font-weight: 600;
+        }
+        .btn-start:hover { transform: scale(1.05); }
+        .btn-start:active { transform: scale(0.95); }
+
+        .info-panel {
+            background: var(--info-bg);
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .info-panel.show { display: block; animation: slideIn 0.3s; }
+
+        .info-title {
+            font-weight: bold;
+            color: #1976D2;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-example {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #424242;
+        }
+
+        .question-box {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 20px 0 30px;
+            color: var(--text);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #F8F9FA;
+            padding: 20px;
+            border-radius: 16px;
+        }
+
+        sub { font-size: 0.6em; vertical-align: sub; }
+        sup { font-size: 0.6em; vertical-align: super; }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #E0E0E0;
+            padding: 20px;
+            font-size: 1.5rem;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+            background: #F3F0FF;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.correct {
+            background: var(--correct);
+            color: white;
+            border-color: var(--correct);
+            animation: pulse 0.4s;
+        }
+
+        .option-btn.wrong {
+            background: var(--wrong);
+            color: white;
+            border-color: var(--wrong);
+            animation: shake 0.4s;
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: #F8F9FA;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .final-score {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 15px 0;
+        }
+
+        .achievements {
+            background: #FFF9E6;
+            border: 2px solid #FFD54F;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .question-box { font-size: 1.8rem; padding: 15px; }
+            .options-grid { gap: 8px; }
+            .option-btn { padding: 15px; font-size: 1.2rem; }
+            h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <div>📊 Логарифмы + Информатика</div>
+        <div class="timer-box">⏱ <span id="timer">60</span> сек</div>
+    </div>
+
+    <div id="start-screen" class="screen">
+        <h1>Логарифмический Спринт</h1>
+
+        <div class="integration-badge">
+            🔗 Межпредметная интеграция: Информатика
+        </div>
+
+        <p class="subtitle">
+            Решай логарифмы и узнай, как они применяются в программировании,
+            алгоритмах и компьютерных науках!
+        </p>
+
+        <div class="info-panel show" style="display: block; margin-bottom: 25px;">
+            <div class="info-title">💡 Почему это важно?</div>
+            <div>
+                Логарифмы — основа компьютерных наук:<br>
+                • <strong>log₂</strong> — двоичная система (биты, байты)<br>
+                • <strong>Сложность алгоритмов</strong> — O(log n)<br>
+                • <strong>Поиск данных</strong> — бинарный поиск<br>
+                • <strong>Структуры данных</strong> — деревья, хеш-таблицы
+            </div>
+        </div>
+
+        <button class="btn-start" onclick="startGame()">🚀 Начать игру</button>
+    </div>
+
+    <div id="game-screen" class="screen hidden">
+        <div class="info-panel" id="info-panel">
+            <div class="info-title" id="info-title">💡 Применение в информатике</div>
+            <div id="info-text"></div>
+            <div class="info-example" id="info-example"></div>
+        </div>
+
+        <div class="question-box" id="question">log₂(8) = ?</div>
+
+        <div class="options-grid" id="options"></div>
+
+        <div class="score-display">
+            <span>💯 Счёт: <span id="current-score">0</span></span>
+            <span>📝 Вопрос <span id="question-num">1</span></span>
+        </div>
+    </div>
+
+    <div id="end-screen" class="screen hidden">
+        <h1>🎉 Игра окончена!</h1>
+        <div style="font-size: 1.2rem; color: #636E72;">Твой результат</div>
+        <div class="final-score" id="final-score">0</div>
+        <p class="subtitle" id="feedback">Отличная работа!</p>
+        <div class="achievements" id="achievements"></div>
+        <button class="btn-start" onclick="startGame()">🔄 Играть снова</button>
+    </div>
+</div>
+
+<script>
+    let score = 0;
+    let timeLeft = 60;
+    let timerInterval;
+    let isAnswering = false;
+    let questionCount = 0;
+    let correctAnswers = 0;
+
+    const csApplications = {
+        'log2': {
+            title: '🖥️ Двоичная система и биты',
+            text: 'log₂ используется для определения количества бит, необходимых для представления числа. Например, log₂(256) = 8 бит = 1 байт.',
+            example: '2⁸ = 256 значений → 8 бит'
+        },
+        'complexity': {
+            title: '⚡ Сложность алгоритмов O(log n)',
+            text: 'Бинарный поиск работает за O(log n) — каждый шаг уменьшает область поиска вдвое. Это намного быстрее линейного поиска!',
+            example: '1000 элементов → всего 10 шагов'
+        },
+        'trees': {
+            title: '🌳 Деревья и структуры данных',
+            text: 'Высота сбалансированного бинарного дерева с n узлами равна log₂(n). Это определяет скорость поиска, вставки и удаления.',
+            example: '1024 узла → высота = 10'
+        },
+        'memory': {
+            title: '💾 Адресация памяти',
+            text: 'Для адресации N ячеек памяти нужно log₂(N) бит. Например, для 4 ГБ памяти нужно 32 бита (2³² = 4,294,967,296).',
+            example: '2³² байт = 4 ГБ'
+        },
+        'entropy': {
+            title: '📡 Теория информации',
+            text: 'Логарифмы измеряют количество информации в битах. Энтропия Шеннона использует log₂ для определения информационной ёмкости.',
+            example: '1 бит = log₂(2) состояния'
+        },
+        'cryptography': {
+            title: '🔒 Криптография',
+            text: 'Сложность взлома шифров часто выражается через логарифмы. Дискретный логарифм — основа алгоритмов RSA и Diffie-Hellman.',
+            example: 'Стойкость ~ log₂(ключ)'
+        }
+    };
+
+    const bases = [2, 3, 4, 5, 10];
+    const exponents = [-2, -1, 0, 1, 2, 3, 4, 5];
+
+    function startGame() {
+        score = 0; timeLeft = 60; questionCount = 0; correctAnswers = 0;
+        updateUI();
+        switchScreen('game-screen');
+        generateQuestion();
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer').textContent = timeLeft;
+            if (timeLeft <= 0) endGame();
+        }, 1000);
+    }
+
+    function endGame() {
+        clearInterval(timerInterval);
+        switchScreen('end-screen');
+        document.getElementById('final-score').textContent = score;
+
+        let achievements = [];
+        if (score >= 5) achievements.push('✅ Новичок в логарифмах');
+        if (score >= 10) achievements.push('🎯 Знаешь информатику');
+        if (score >= 15) achievements.push('⚡ Быстрый как алгоритм O(log n)');
+        if (score >= 20) achievements.push('🏆 Мастер компьютерных наук');
+        if (correctAnswers > 0 && questionCount > 0 && (correctAnswers / questionCount) > 0.8)
+            achievements.push('🎓 Точность 80%+');
+
+        const achievementsDiv = document.getElementById('achievements');
+        achievementsDiv.innerHTML = achievements.length > 0
+            ? '<div style="font-weight: bold; margin-bottom: 10px;">🏅 Достижения:</div>' + achievements.map(a => `<div class="achievement-item">${a}</div>`).join('')
+            : '<div class="achievement-item">💪 Продолжай учиться!</div>';
+
+        let feedback = "";
+        if (score < 5) feedback = "Хорошее начало! Повтори тему логарифмов 📚";
+        else if (score < 10) feedback = "Неплохо! Ты понимаешь основы 👍";
+        else if (score < 15) feedback = "Отлично! Ты готов к экзамену по информатике 🎯";
+        else if (score < 20) feedback = "Великолепно! Логарифмы — твоя сильная сторона 🌟";
+        else feedback = "Ты настоящий гуру компьютерных наук! 👑";
+        document.getElementById('feedback').textContent = feedback;
+    }
+
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
+        document.getElementById(screenId).classList.remove('hidden');
+    }
+
+    function updateUI() {
+        document.getElementById('current-score').textContent = score;
+        document.getElementById('timer').textContent = timeLeft;
+        document.getElementById('question-num').textContent = questionCount + 1;
+    }
+
+    function formatLog(base, arg) {
+        return `log<sub>${base}</sub>(${arg})`;
+    }
+
+    function getCSInfo(base) {
+        if (base === 2) {
+            const keys = Object.keys(csApplications);
+            return csApplications[keys[Math.floor(Math.random() * keys.length)]];
+        }
+        return {
+            title: '📐 Математическое свойство',
+            text: `Логарифм — обратная операция к возведению в степень: если aˣ = b, то log_a(b) = x`,
+            example: `a^x = b → log_a(b) = x`
+        };
+    }
+
+    function showInfoPanel(base) {
+        const info = getCSInfo(base);
+        const panel = document.getElementById('info-panel');
+        document.getElementById('info-title').textContent = info.title;
+        document.getElementById('info-text').textContent = info.text;
+        document.getElementById('info-example').textContent = info.example;
+        panel.classList.add('show');
+        setTimeout(() => panel.classList.remove('show'), 5000);
+    }
+
+    function generateQuestion() {
+        isAnswering = false;
+        const optionsContainer = document.getElementById('options');
+        optionsContainer.innerHTML = '';
+
+        const base = bases[Math.floor(Math.random() * bases.length)];
+        const exponent = exponents[Math.floor(Math.random() * exponents.length)];
+        const arg = Math.pow(base, exponent);
+
+        document.getElementById('question').innerHTML = `${formatLog(base, arg)} = ?`;
+
+        const correctAnswer = exponent;
+        let answers = new Set([correctAnswer]);
+        while (answers.size < 4) {
+            let d = correctAnswer + Math.floor(Math.random() * 5) - 2;
+            if (d !== correctAnswer) answers.add(d);
+            if (answers.size < 4 && Math.random() > 0.5) answers.add(Math.floor(Math.random() * 10) - 3);
+        }
+
+        Array.from(answers).sort(() => Math.random() - 0.5).forEach(ans => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = ans;
+            btn.onclick = () => checkAnswer(btn, ans, correctAnswer, base);
+            optionsContainer.appendChild(btn);
+        });
+
+        updateUI();
+    }
+
+    function checkAnswer(btn, selected, correct, base) {
+        if (isAnswering) return;
+        isAnswering = true;
+        questionCount++;
+
+        if (selected === correct) {
+            score++;
+            correctAnswers++;
+            btn.classList.add('correct');
+        } else {
+            btn.classList.add('wrong');
+            document.querySelectorAll('.option-btn').forEach(b => {
+                if (parseInt(b.textContent) === correct) b.classList.add('correct');
+            });
+        }
+        showInfoPanel(base);
+        setTimeout(generateQuestion, 1500);
+    }
+</script>
+</body>
+</html>

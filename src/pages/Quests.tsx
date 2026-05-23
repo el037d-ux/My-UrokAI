@@ -30,6 +30,15 @@ const SPECIAL_QUESTS = [
     count: "6 уровней",
     path: "/quests/smart-goals",
   },
+  {
+    id: "math-logarithms",
+    icon: "📊",
+    title: "Логарифмический спринт",
+    desc: "Реши как можно больше логарифмов за 60 секунд. Межпредметная интеграция с информатикой: биты, алгоритмы, структуры данных.",
+    color: "from-orange-500 to-amber-600",
+    count: "60 секунд",
+    path: "/quests/math-logarithms",
+  },
 ];
 
 // ── Финансовый навигатор ─────────────────────────────────────────────────────
@@ -409,8 +418,9 @@ export default function Quests() {
                   emoji="📐"
                   title="Математика"
                   color="from-orange-500 to-amber-600"
-                  empty
-                />
+                >
+                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "math-logarithms")!} navigate={navigate} />
+                </CategoryFolder>
 
                 {/* Проектный менеджмент */}
                 <CategoryFolder
