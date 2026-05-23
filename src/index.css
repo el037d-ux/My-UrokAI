@@ -64,24 +64,24 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Inter", "Golos Text", sans-serif;
+    font-family: Arial, sans-serif;
   }
 
   h1,
   h2,
   h3 {
-    font-family: "Nunito", "Golos Text", sans-serif;
+    font-family: Arial, sans-serif;
     font-weight: 700;
   }
 }
 
 @layer utilities {
   .font-display {
-    font-family: "Nunito", "Golos Text", sans-serif;
+    font-family: Arial, sans-serif;
     font-weight: 700;
   }
   .font-body {
-    font-family: "Inter", "Golos Text", sans-serif;
+    font-family: Arial, sans-serif;
   }
 }
 

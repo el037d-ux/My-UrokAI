@@ -19,8 +19,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				display: ['Nunito', 'Golos Text', 'sans-serif'],
-				body: ['Inter', 'Golos Text', 'sans-serif'],
+				display: ['Arial', 'sans-serif'],
+				body: ['Arial', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
