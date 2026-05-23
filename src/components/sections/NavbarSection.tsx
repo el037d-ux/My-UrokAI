@@ -1,7 +1,98 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
+
+const WISE_QUOTES = [
+  "Не верь первому, что увидел. Проверяй второе, что услышал. Действуй на основе третьего — проверенного.",
+  "Информационный шум — не твоя реальность. Фильтр — твой выбор.",
+  "Критическое мышление — это не недоверие ко всем. Это уважение к фактам.",
+  "Твоё внимание — самая дорогая валюта. Трать её осознанно.",
+  "Если новость вызывает срочность или страх — остановись. Манипуляция любит спешку.",
+  "Не путай мнение эксперта с доказанным исследованием.",
+  "Цифровая гигиена начинается с вопроса: «Зачем я это читаю?»",
+  "Факты не кричат. Они ждут, пока ты задашь правильные вопросы.",
+  "Отписаться от токсичного источника — не слабость. Это акт заботы о своём уме.",
+  "Информация без контекста — просто шум с красивым заголовком.",
+  "Твоя лента не обязана быть полной. Она должна быть полезной.",
+  "Проверяй источник так же тщательно, как проверяешь состав продуктов в магазине.",
+  "Мозг устает не от информации, а от её хаоса. Структурируй поток.",
+  "«Все так говорят» — не аргумент. «Вот данные» — да.",
+  "Информационная грамотность — это не знание всего. Это умение найти и проверить нужное.",
+  "Не позволяй алгоритмам решать, о чём тебе думать. Возвращай контроль.",
+  "Эмоция — плохой компас для решений. Факт — надёжный.",
+  "Читай медленно, думай глубоко, проверяй дважды.",
+  "Твои убеждения должны расти вместе с новыми доказательствами, а не цепляться за старые.",
+  "Информация, которую ты не проверяешь, в итоге проверяет тебя.",
+  "Не бойся сказать «я не знаю» — это начало мудрости. Бойся сказать «я уверен» без проверки.",
+  "Цифровой детокс — не отказ от мира. Это возврат к себе.",
+  "Критический взгляд — это не цинизм. Это забота о ясности.",
+  "Прежде чем поделиться — остановись на 3 секунды. Спроси: «А это правда? А это нужно?»",
+  "Твоя информационная диета определяет твою ментальную форму.",
+  "Не гонись за трендами. Гонись за фактами.",
+  "Осознанное потребление информации начинается с паузы между стимулом и реакцией.",
+  "Каждый источник, который ты оставляешь в ленте, голосует за твоё будущее мышление.",
+  "Умный человек не собирает всё подряд. Он строит систему отбора.",
+  "Информационная грамотность — это не навык. Это ежедневная практика свободы выбора.",
+];
+
+function WiseButton() {
+  const saved = typeof window !== "undefined" ? localStorage.getItem("wise-quote-index") : null;
+  const [index, setIndex] = useState<number>(
+    saved !== null ? parseInt(saved, 10) : Math.floor(Math.random() * WISE_QUOTES.length)
+  );
+  const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  function nextQuote() {
+    setVisible(false);
+    setTimeout(() => {
+      let next: number;
+      do { next = Math.floor(Math.random() * WISE_QUOTES.length); } while (next === index && WISE_QUOTES.length > 1);
+      setIndex(next);
+      localStorage.setItem("wise-quote-index", String(next));
+      setVisible(true);
+    }, 200);
+  }
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-sm font-body font-semibold text-orange-500 hover:border-orange-300 hover:bg-orange-50 transition-all"
+      >
+        💡 Мудрая минутка
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-border p-4 z-50 animate-fade-in">
+          <p className="font-body text-xs font-semibold text-orange-600 uppercase tracking-wider mb-2">💡 Мудрая минутка</p>
+          <p
+            className="font-body text-sm text-foreground leading-relaxed mb-3 transition-opacity duration-200"
+            style={{ opacity: visible ? 1 : 0 }}
+          >
+            {WISE_QUOTES[index]}
+          </p>
+          <button
+            onClick={nextQuote}
+            className="w-full py-2 rounded-xl bg-orange-50 text-orange-600 font-body font-semibold text-xs hover:bg-orange-100 transition-colors"
+          >
+            Следующая →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const HERO_IMAGE = "https://cdn.poehali.dev/projects/3a27d5a9-016a-43ab-946d-4c4fe8129705/bucket/fb741ecb-cd4a-4766-ba6b-9c590c24dfe7.png";
 
@@ -51,6 +142,7 @@ function Navbar({ onStart, onAuth, onPayment, onProfile }: { onStart: () => void
             <Icon name="Swords" size={14} className="text-amber" />
             Тренажёры
           </button>
+          <WiseButton />
 
           {token ? (
             <button onClick={onProfile} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-body font-semibold hover:bg-primary/90 transition-all shadow-md shadow-primary/25 active:scale-95">
