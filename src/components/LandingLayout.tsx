@@ -1,5 +1,5 @@
 import { Navbar, Hero } from "@/components/sections/NavbarSection";
-import { About, ChatDemo, FAQ } from "@/components/sections/ContentSections";
+import { About, ChatDemo, FAQ, WiseMinute } from "@/components/sections/ContentSections";
 import { CTA, Contacts, Footer } from "@/components/sections/CtaFooter";
 
 type Props = {
@@ -21,6 +21,7 @@ export default function LandingLayout({ onStart, onGame, onAnalysis, onAuth, onP
       <Hero onStart={onStart} onGame={onGame} onAnalysis={onAnalysis} onPayment={onPayment} lessonsLeft={lessonsLeft} gamesLeft={gamesLeft} isPaid={isPaid} />
       <About />
       <ChatDemo onPayment={onPayment} />
+      <WiseMinute />
       <FAQ />
       <CTA onStart={onStart} onPayment={onPayment} />
       <Contacts />

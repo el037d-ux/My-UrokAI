@@ -418,4 +418,86 @@ function Articles() {
   );
 }
 
+const WISE_QUOTES = [
+  "Не верь первому, что увидел. Проверяй второе, что услышал. Действуй на основе третьего — проверенного.",
+  "Информационный шум — не твоя реальность. Фильтр — твой выбор.",
+  "Критическое мышление — это не недоверие ко всем. Это уважение к фактам.",
+  "Твоё внимание — самая дорогая валюта. Трать её осознанно.",
+  "Если новость вызывает срочность или страх — остановись. Манипуляция любит спешку.",
+  "Не путай мнение эксперта с доказанным исследованием.",
+  "Цифровая гигиена начинается с вопроса: «Зачем я это читаю?»",
+  "Факты не кричат. Они ждут, пока ты задашь правильные вопросы.",
+  "Отписаться от токсичного источника — не слабость. Это акт заботы о своём уме.",
+  "Информация без контекста — просто шум с красивым заголовком.",
+  "Твоя лента не обязана быть полной. Она должна быть полезной.",
+  "Проверяй источник так же тщательно, как проверяешь состав продуктов в магазине.",
+  "Мозг устает не от информации, а от её хаоса. Структурируй поток.",
+  "«Все так говорят» — не аргумент. «Вот данные» — да.",
+  "Информационная грамотность — это не знание всего. Это умение найти и проверить нужное.",
+  "Не позволяй алгоритмам решать, о чём тебе думать. Возвращай контроль.",
+  "Эмоция — плохой компас для решений. Факт — надёжный.",
+  "Читай медленно, думай глубоко, проверяй дважды.",
+  "Твои убеждения должны расти вместе с новыми доказательствами, а не цепляться за старые.",
+  "Информация, которую ты не проверяешь, в итоге проверяет тебя.",
+  "Не бойся сказать «я не знаю» — это начало мудрости. Бойся сказать «я уверен» без проверки.",
+  "Цифровой детокс — не отказ от мира. Это возврат к себе.",
+  "Критический взгляд — это не цинизм. Это забота о ясности.",
+  "Прежде чем поделиться — остановись на 3 секунды. Спроси: «А это правда? А это нужно?»",
+  "Твоя информационная диета определяет твою ментальную форму.",
+  "Не гонись за трендами. Гонись за фактами.",
+  "Осознанное потребление информации начинается с паузы между стимулом и реакцией.",
+  "Каждый источник, который ты оставляешь в ленте, голосует за твоё будущее мышление.",
+  "Умный человек не собирает всё подряд. Он строит систему отбора.",
+  "Информационная грамотность — это не навык. Это ежедневная практика свободы выбора.",
+];
+
+export function WiseMinute() {
+  const saved = typeof window !== "undefined" ? localStorage.getItem("wise-quote-index") : null;
+  const [index, setIndex] = useState<number>(
+    saved !== null ? parseInt(saved, 10) : Math.floor(Math.random() * WISE_QUOTES.length)
+  );
+  const [visible, setVisible] = useState(true);
+
+  function nextQuote() {
+    setVisible(false);
+    setTimeout(() => {
+      let next: number;
+      do { next = Math.floor(Math.random() * WISE_QUOTES.length); } while (next === index && WISE_QUOTES.length > 1);
+      setIndex(next);
+      localStorage.setItem("wise-quote-index", String(next));
+      setVisible(true);
+    }, 250);
+  }
+
+  return (
+    <section className="py-12 sm:py-16 bg-gradient-to-br from-amber-50 via-orange-50 to-teal-50">
+      <div className="container max-w-2xl mx-auto px-4 sm:px-6">
+        <div className="section-fade text-center mb-6">
+          <span className="inline-block px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-body font-semibold uppercase tracking-wider mb-3">💡 Мудрая минутка</span>
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">Мысль дня</h2>
+        </div>
+
+        <div className="section-fade relative bg-white rounded-3xl shadow-lg border-t-4 border-teal-400 px-8 py-10 text-center">
+          <span className="absolute top-0 left-5 -translate-y-1/2 text-7xl text-orange-200/60 font-serif leading-none select-none">❝</span>
+          <p
+            className="font-body text-base sm:text-lg font-medium text-foreground leading-relaxed min-h-[80px] flex items-center justify-center transition-opacity duration-300"
+            style={{ opacity: visible ? 1 : 0 }}
+          >
+            {WISE_QUOTES[index]}
+          </p>
+        </div>
+
+        <div className="section-fade flex justify-center mt-6">
+          <button
+            onClick={nextQuote}
+            className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-orange-400 to-orange-300 text-white font-body font-semibold text-sm shadow-md shadow-orange-200 hover:from-orange-500 hover:to-orange-400 hover:shadow-orange-300 hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
+          >
+            💡 Совет дня
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export { About, ChatDemo, FAQ, Articles };
