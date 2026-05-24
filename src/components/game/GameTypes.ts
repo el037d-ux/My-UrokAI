@@ -1,4 +1,4 @@
-export const GENERATE_GAME_URL = "https://functions.poehali.dev/5626bab5-bf92-4e3d-9994-865dfeda70ec";
+export const GENERATE_GAME_URL = "https://functions.poehali.dev/acc2b019-de6d-4961-914e-394914e55d5a";
 
 export const CLASS_OPTIONS = [
   "1 класс","2 класс","3 класс","4 класс","5 класс","6 класс","7 класс",

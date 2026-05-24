@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
 
-const CHAT_URL = "https://functions.poehali.dev/1186dab1-1c68-4be5-95d4-74d1e710571e";
+const CHAT_URL = "https://functions.poehali.dev/acc2b019-de6d-4961-914e-394914e55d5a";
 
 const SUGGESTIONS = [
   "Придумай игру по истории для 7 класса",

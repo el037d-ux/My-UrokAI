@@ -2,7 +2,7 @@ import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
 
-const GENERATE_LESSON_URL = "https://functions.poehali.dev/1186dab1-1c68-4be5-95d4-74d1e710571e";
+const GENERATE_LESSON_URL = "https://functions.poehali.dev/acc2b019-de6d-4961-914e-394914e55d5a";
 const USER_STATUS_URL = "https://functions.poehali.dev/e173392a-d801-4fb1-8a22-1d4eae8245b0";
 
 const CLASS_OPTIONS = ["1 класс","2 класс","3 класс","4 класс","5 класс","6 класс","7 класс","8 класс","9 класс","10 класс","11 класс","СПО / колледж","Студенты / взрослые"];
@@ -446,7 +446,7 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
       const res = await fetch(GENERATE_LESSON_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ action: "lesson", ...form }),
       });
       const data = await res.json();
       if (data.ok && data.lesson) {

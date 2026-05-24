@@ -1,0 +1,64 @@
+{
+  "tests": [
+    {
+      "name": "Генерация урока",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "lesson",
+        "subject": "Математика",
+        "grade": "7",
+        "topic": "Теорема Пифагора",
+        "duration": "45 мин"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {"ok": true},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Генерация игры",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "game",
+        "subject": "История",
+        "grade": "8",
+        "topic": "Вторая мировая война",
+        "duration": "20 мин"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {"ok": true},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Самоанализ урока",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "analysis",
+        "subject": "Биология",
+        "grade": "9",
+        "topic": "Фотосинтез",
+        "goal": "Изучить процесс фотосинтеза",
+        "technologies": "Лекция, работа в группах",
+        "achievements": "Ученики активно участвовали",
+        "difficulties": "Сложная терминология"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {"ok": true},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Чат",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "chat",
+        "messages": [{"role": "user", "content": "Дай идею для мотивации учеников"}]
+      },
+      "expectedStatus": 200,
+      "expectedBody": {"reply": "string"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

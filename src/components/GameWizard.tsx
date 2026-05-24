@@ -43,7 +43,7 @@ export default function GameWizard({ onClose }: { onClose: () => void }) {
       const res = await fetch(GENERATE_GAME_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ action: "game", ...form }),
       });
       const data = await res.json();
       if (data.ok && data.game) {

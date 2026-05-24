@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
-const ANALYSIS_URL = "https://functions.poehali.dev/a0cc3d7b-8fde-40d8-8f4a-4f526582751f";
+const ANALYSIS_URL = "https://functions.poehali.dev/acc2b019-de6d-4961-914e-394914e55d5a";
 
 type Step = { id: string; label: string; icon: string };
 
@@ -140,7 +140,7 @@ export default function SelfAnalysisWizard({ onClose }: { onClose: () => void })
       const res = await fetch(ANALYSIS_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ action: "analysis", ...form }),
       });
       const data = await res.json();
       if (data.ok) {
