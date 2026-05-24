@@ -5,7 +5,7 @@ import { CTA, Contacts, Footer } from "@/components/sections/CtaFooter";
 type Props = {
   onStart: () => void;
   onGame: () => void;
-  onAnalysis: () => void;
+
   onAuth: () => void;
   onPayment: () => void;
   onProfile: () => void;
@@ -14,11 +14,11 @@ type Props = {
   isPaid: boolean;
 };
 
-export default function LandingLayout({ onStart, onGame, onAnalysis, onAuth, onPayment, onProfile, lessonsLeft, gamesLeft, isPaid }: Props) {
+export default function LandingLayout({ onStart, onGame, onAuth, onPayment, onProfile, lessonsLeft, gamesLeft, isPaid }: Props) {
   return (
     <>
       <Navbar onStart={onStart} onAuth={onAuth} onPayment={onPayment} onProfile={onProfile} />
-      <Hero onStart={onStart} onGame={onGame} onAnalysis={onAnalysis} onPayment={onPayment} lessonsLeft={lessonsLeft} gamesLeft={gamesLeft} isPaid={isPaid} />
+      <Hero onStart={onStart} onGame={onGame} onPayment={onPayment} lessonsLeft={lessonsLeft} gamesLeft={gamesLeft} isPaid={isPaid} />
       <About />
       <ChatDemo onPayment={onPayment} />
       <FAQ />

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import LandingLayout from "@/components/LandingLayout";
 import LessonWizard from "@/components/LessonWizard";
 import GameWizard from "@/components/GameWizard";
-import SelfAnalysisWizard from "@/components/SelfAnalysisWizard";
+
 import AuthModal from "@/components/AuthModal";
 import PaymentModal from "@/components/PaymentModal";
 import { useUser } from "@/context/UserContext";
@@ -30,7 +30,7 @@ export default function Index() {
 
   const [wizardOpen, setWizardOpen] = useState(false);
   const [gameOpen, setGameOpen] = useState(false);
-  const [analysisOpen, setAnalysisOpen] = useState(false);
+
   const [authOpen, setAuthOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
 
@@ -58,11 +58,6 @@ export default function Index() {
     setGameOpen(true);
   };
 
-  const handleAnalysis = () => {
-    if (!token) { setAuthOpen(true); return; }
-    if (status && !status.can_use.analyses) { setPaymentOpen(true); return; }
-    setAnalysisOpen(true);
-  };
 
   const handleLessonClose = () => {
     if (!token) {
@@ -93,7 +88,7 @@ export default function Index() {
     <div className="min-h-screen">
       {wizardOpen && <LessonWizard onClose={handleLessonClose} />}
       {gameOpen && <GameWizard onClose={handleGameClose} />}
-      {analysisOpen && <SelfAnalysisWizard onClose={() => setAnalysisOpen(false)} />}
+
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
       {paymentOpen && <PaymentModal onClose={() => setPaymentOpen(false)} />}
 
@@ -123,7 +118,7 @@ export default function Index() {
       <LandingLayout
         onStart={handleStart}
         onGame={handleGame}
-        onAnalysis={handleAnalysis}
+
         onAuth={() => setAuthOpen(true)}
         onPayment={() => setPaymentOpen(true)}
         onProfile={() => navigate("/profile")}

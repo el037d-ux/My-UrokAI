@@ -193,7 +193,7 @@ function Navbar({ onStart, onAuth, onPayment, onProfile }: { onStart: () => void
   );
 }
 
-function Hero({ onStart, onGame, onAnalysis, onPayment, lessonsLeft, gamesLeft, isPaid }: { onStart: () => void; onGame: () => void; onAnalysis: () => void; onPayment: () => void; lessonsLeft: number | null; gamesLeft: number | null; isPaid: boolean }) {
+function Hero({ onStart, onGame, onPayment, lessonsLeft, gamesLeft, isPaid }: { onStart: () => void; onGame: () => void; onPayment: () => void; lessonsLeft: number | null; gamesLeft: number | null; isPaid: boolean }) {
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-indigo-light/40 to-teal-light/30 -z-10" />
