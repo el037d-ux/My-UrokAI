@@ -193,7 +193,7 @@ function Navbar({ onStart, onAuth, onPayment, onProfile }: { onStart: () => void
   );
 }
 
-function Hero({ onStart, onGame, onPayment, lessonsLeft, gamesLeft, isPaid }: { onStart: () => void; onGame: () => void; onPayment: () => void; lessonsLeft: number | null; gamesLeft: number | null; isPaid: boolean }) {
+function Hero({ onStart, onGame, onAnalysis, onPayment, lessonsLeft, gamesLeft, isPaid }: { onStart: () => void; onGame: () => void; onAnalysis: () => void; onPayment: () => void; lessonsLeft: number | null; gamesLeft: number | null; isPaid: boolean }) {
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-indigo-light/40 to-teal-light/30 -z-10" />
@@ -254,6 +254,22 @@ function Hero({ onStart, onGame, onPayment, lessonsLeft, gamesLeft, isPaid }: { 
               {isPaid && <span className="text-xs font-body font-normal opacity-70">Безлимитно</span>}
             </button>
 
+          </div>
+
+          <div className="animate-fade-in-up delay-400">
+            <button
+              onClick={onAnalysis}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl border border-border bg-white/60 hover:bg-white hover:border-teal/40 transition-all group"
+            >
+              <span className="w-8 h-8 rounded-xl bg-teal-light flex items-center justify-center flex-shrink-0">
+                <Icon name="BarChart2" size={16} className="text-teal" />
+              </span>
+              <div className="text-left">
+                <div className="font-body text-sm font-semibold text-foreground group-hover:text-teal transition-colors">Самоанализ урока</div>
+                <div className="font-body text-xs text-muted-foreground">ИИ поможет разобрать урок</div>
+              </div>
+              <Icon name="ChevronRight" size={16} className="text-muted-foreground ml-auto group-hover:text-teal transition-colors" />
+            </button>
           </div>
 
           <div className="flex flex-wrap gap-4 sm:gap-6 animate-fade-in-up delay-500">

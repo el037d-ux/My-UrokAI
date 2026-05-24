@@ -122,7 +122,7 @@ export default function PaymentModal({ onClose }: { onClose: () => void }) {
               <div className="p-4 rounded-2xl bg-indigo-light border border-indigo-mid">
                 <div className="font-body text-xs font-semibold text-primary uppercase tracking-wider mb-2">С подпиской доступно</div>
                 <ul className="space-y-1.5">
-                  {["Неограниченные планы уроков", "Неограниченные игры", "Приоритетная поддержка"].map(f => (
+                  {["Неограниченные планы уроков", "Неограниченные игры", "Самоанализ урока", "Приоритетная поддержка"].map(f => (
                     <li key={f} className="flex items-center gap-2 font-body text-sm text-foreground">
                       <Icon name="Check" size={14} className="text-teal flex-shrink-0" />{f}
                     </li>
