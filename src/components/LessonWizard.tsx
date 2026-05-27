@@ -408,7 +408,7 @@ function LessonResult({ lesson, historyId, onClose }: { lesson: LessonPlan; hist
   );
 }
 
-export default function LessonWizard({ onClose }: { onClose: () => void }) {
+export default function LessonWizard({ onClose, onPayment }: { onClose: () => void; onPayment?: () => void }) {
   const { token, incrementUsage } = useUser();
   const [step, setStep] = useState(1);
   const [animating, setAnimating] = useState(false);
@@ -443,12 +443,15 @@ export default function LessonWizard({ onClose }: { onClose: () => void }) {
     setLoading(true);
     setError("");
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
       const res = await fetch(GENERATE_LESSON_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ action: "lesson", ...form }),
       });
       const data = await res.json();
+      if (data.limit_exceeded) { onClose(); onPayment?.(); return; }
       if (data.ok && data.lesson) {
         setLesson(data.lesson);
         await incrementUsage("lessons");

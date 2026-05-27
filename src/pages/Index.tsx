@@ -90,29 +90,42 @@ export default function Index() {
     ? status ? Math.max(0, status.limits.games - status.usage.games) : null
     : Math.max(0, FREE_GAMES - guestGames);
 
+  // Подписка была, но истекла (план сброшен в free, но лимиты уже исчерпаны)
+  const isSubscriptionExpired = !!(
+    token &&
+    status &&
+    status.plan === "free" &&
+    status.usage.lessons >= 5 &&
+    status.usage.games >= 5
+  );
+
   return (
     <div className="min-h-screen">
-      {wizardOpen && <LessonWizard onClose={handleLessonClose} />}
-      {gameOpen && <GameWizard onClose={handleGameClose} />}
+      {wizardOpen && <LessonWizard onClose={handleLessonClose} onPayment={() => setPaymentOpen(true)} />}
+      {gameOpen && <GameWizard onClose={handleGameClose} onPayment={() => setPaymentOpen(true)} />}
       {analysisOpen && <SelfAnalysisWizard onClose={() => setAnalysisOpen(false)} />}
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
       {paymentOpen && <PaymentModal onClose={() => setPaymentOpen(false)} />}
 
       {/* Плашка авторизованного пользователя */}
       {token && status && (
-        <div className="fixed bottom-3 right-3 sm:bottom-4 sm:right-4 z-50 bg-white rounded-2xl shadow-xl border border-border px-3 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3 animate-fade-in max-w-[calc(100vw-1.5rem)]">
+        <div className={`fixed bottom-3 right-3 sm:bottom-4 sm:right-4 z-50 bg-white rounded-2xl shadow-xl border px-3 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3 animate-fade-in max-w-[calc(100vw-1.5rem)] ${isSubscriptionExpired ? "border-destructive/40" : "border-border"}`}>
           <div className="min-w-0">
             <div className="font-body text-xs font-semibold text-foreground truncate max-w-[140px] sm:max-w-none">{status.user?.name || status.user?.email}</div>
             <div className="font-body text-xs text-muted-foreground hidden sm:block">
-              {status.plan === "free"
-                ? `Уроки: ${status.usage.lessons}/3 · Игры: ${status.usage.games}/3`
-                : "Подписка активна"}
+              {isSubscriptionExpired
+                ? <span className="text-destructive font-semibold">Подписка истекла</span>
+                : status.plan === "free"
+                  ? `Уроки: ${status.usage.lessons}/5 · Игры: ${status.usage.games}/5`
+                  : status.expires_at
+                    ? `До ${new Date(status.expires_at).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}`
+                    : "Подписка активна"}
             </div>
           </div>
-          {status.plan === "free" && (
+          {(status.plan === "free" || isSubscriptionExpired) && (
             <button onClick={() => setPaymentOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-primary text-white font-body text-xs font-semibold hover:bg-primary/90 transition-colors flex-shrink-0">
-              Купить
+              className={`px-3 py-1.5 rounded-lg font-body text-xs font-semibold transition-colors flex-shrink-0 ${isSubscriptionExpired ? "bg-destructive text-white hover:bg-destructive/90" : "bg-primary text-white hover:bg-primary/90"}`}>
+              {isSubscriptionExpired ? "Продлить" : "Купить"}
             </button>
           )}
           <button onClick={logout} className="w-6 h-6 rounded-lg hover:bg-slate flex items-center justify-center transition-colors flex-shrink-0">

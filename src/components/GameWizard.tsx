@@ -7,7 +7,7 @@ import { useUser } from "@/context/UserContext";
 
 const USER_STATUS_URL = "https://functions.poehali.dev/e173392a-d801-4fb1-8a22-1d4eae8245b0";
 
-export default function GameWizard({ onClose }: { onClose: () => void }) {
+export default function GameWizard({ onClose, onPayment }: { onClose: () => void; onPayment?: () => void }) {
   const { token, incrementUsage } = useUser();
   const [step, setStep] = useState(1);
   const [animating, setAnimating] = useState(false);
@@ -40,12 +40,15 @@ export default function GameWizard({ onClose }: { onClose: () => void }) {
     setLoading(true);
     setError("");
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
       const res = await fetch(GENERATE_GAME_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ action: "game", ...form }),
       });
       const data = await res.json();
+      if (data.limit_exceeded) { onClose(); onPayment?.(); return; }
       if (data.ok && data.game) {
         setGame(data.game);
         await incrementUsage("games");

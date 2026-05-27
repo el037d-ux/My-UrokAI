@@ -2,10 +2,14 @@ import json
 import os
 import urllib.request
 import re
+import psycopg2
+from datetime import datetime, timezone
 
 
 API_URL = "https://api.aitunnel.ru/v1/chat/completions"
 MODEL = "gpt-4o-mini"
+SCHEMA = os.environ.get('MAIN_DB_SCHEMA', 't_p75689129_landing_chatbot_desi')
+FREE_LIMITS = {'lessons': 5, 'games': 5, 'analyses': 0}
 
 CORS_HEADERS = {
     'Access-Control-Allow-Origin': '*',
@@ -300,6 +304,56 @@ def handle_analysis(api_key, body):
     return ok({'ok': True, 'analysis': analysis})
 
 
+def check_limit(token, resource):
+    """Проверяет лимит пользователя. Возвращает (allowed: bool, error_msg: str|None)."""
+    if not token:
+        return True, None
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            f"SELECT s.user_id FROM {SCHEMA}.sessions s WHERE s.token=%s AND s.expires_at > NOW()",
+            (token,)
+        )
+        row = cur.fetchone()
+        if not row:
+            return True, None
+        user_id = row[0]
+
+        cur.execute(
+            f"SELECT plan, expires_at FROM {SCHEMA}.subscriptions WHERE user_id=%s AND is_active=TRUE ORDER BY started_at DESC LIMIT 1",
+            (user_id,)
+        )
+        sub = cur.fetchone()
+        plan = sub[0] if sub else 'free'
+        expires_at = sub[1] if sub else None
+
+        if plan != 'free' and expires_at and expires_at < datetime.now(timezone.utc):
+            cur.execute(f"UPDATE {SCHEMA}.subscriptions SET is_active=FALSE WHERE user_id=%s AND plan!='free'", (user_id,))
+            conn.commit()
+            plan = 'free'
+
+        if plan != 'free':
+            return True, None
+
+        col_map = {'lessons': 'lessons_used', 'games': 'games_used', 'analyses': 'analyses_used'}
+        col = col_map.get(resource)
+        if not col:
+            return True, None
+
+        cur.execute(f"SELECT {col} FROM {SCHEMA}.usage_counts WHERE user_id=%s", (user_id,))
+        usage_row = cur.fetchone()
+        used = usage_row[0] if usage_row else 0
+        limit = FREE_LIMITS.get(resource, 0)
+
+        if used >= limit:
+            return False, 'Лимит исчерпан. Оформите подписку для продолжения.'
+        return True, None
+    finally:
+        cur.close()
+        conn.close()
+
+
 def handler(event: dict, context) -> dict:
     """Единая функция генерации: урок (lesson), игра (game), самоанализ (analysis), чат (chat)."""
 
@@ -309,6 +363,21 @@ def handler(event: dict, context) -> dict:
     api_key = os.environ.get('AITUNNEL_API_KEY', '')
     body = json.loads(event.get('body') or '{}')
     action = body.get('action', 'lesson')
+
+    token = (event.get('headers') or {}).get('X-Authorization', '').replace('Bearer ', '').strip()
+    if not token:
+        token = (event.get('headers') or {}).get('Authorization', '').replace('Bearer ', '').strip()
+
+    resource_map = {'lesson': 'lessons', 'game': 'games', 'analysis': 'analyses'}
+    resource = resource_map.get(action)
+    if resource:
+        allowed, limit_err = check_limit(token, resource)
+        if not allowed:
+            return {
+                'statusCode': 403,
+                'headers': {'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'ok': False, 'error': limit_err, 'limit_exceeded': True})
+            }
 
     if action == 'chat':
         return handle_chat(api_key, body)
