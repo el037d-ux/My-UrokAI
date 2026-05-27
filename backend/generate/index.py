@@ -73,7 +73,7 @@ def handle_chat(api_key, body):
     reply = call_ai(
         api_key,
         [{'role': 'system', 'content': CHAT_SYSTEM_PROMPT}] + messages,
-        temperature=0.8, max_tokens=1000
+        max_tokens=1000
     )
     return ok({'reply': reply})
 
@@ -169,7 +169,7 @@ def handle_lesson(api_key, body):
     content = call_ai(api_key, [
         {'role': 'system', 'content': 'Ты профессиональный методист с 20-летним опытом. Составляешь детальные планы-конспекты уроков. Отвечаешь только валидным JSON без markdown-блоков.'},
         {'role': 'user', 'content': prompt}
-    ], temperature=0.7, max_tokens=4000)
+    ], max_tokens=2000)
 
     lesson_plan = json.loads(strip_json(content))
     return ok({'ok': True, 'lesson': lesson_plan})
@@ -243,7 +243,7 @@ def handle_game(api_key, body):
     content = call_ai(api_key, [
         {'role': 'system', 'content': 'Ты профессиональный педагог-методист с 20-летним опытом геймификации. Создаёшь детальные, готовые к использованию образовательные игры. Отвечаешь только валидным JSON без markdown-блоков.'},
         {'role': 'user', 'content': prompt}
-    ], temperature=0.8, max_tokens=3500)
+    ], max_tokens=2000)
 
     game = json.loads(strip_json(content))
     return ok({'ok': True, 'game': game})
@@ -294,7 +294,7 @@ def handle_analysis(api_key, body):
     content = call_ai(api_key, [
         {'role': 'system', 'content': 'Ты профессиональный методист-эксперт. Составляешь самоанализы уроков. Отвечаешь только валидным JSON без markdown.'},
         {'role': 'user', 'content': prompt}
-    ], temperature=0.7, max_tokens=1500)
+    ], max_tokens=1500)
 
     analysis = json.loads(strip_json(content))
     return ok({'ok': True, 'analysis': analysis})
