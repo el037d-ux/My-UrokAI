@@ -70,6 +70,11 @@ export default {
 					DEFAULT: 'hsl(var(--teal))',
 					light: 'hsl(var(--teal-light))',
 				},
+				violet: {
+					DEFAULT: 'hsl(var(--violet))',
+					light: 'hsl(var(--violet-light))',
+					mid: 'hsl(var(--violet-mid))',
+				},
 				slate: {
 					DEFAULT: 'hsl(var(--slate))',
 					mid: 'hsl(var(--slate-mid))',

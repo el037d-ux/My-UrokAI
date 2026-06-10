@@ -218,71 +218,70 @@ function Hero({ onStart, onGame, onAnalysis, onIntensive, onPayment, lessonsLeft
             Опишите тему, возраст учеников и предмет — УрокАИ предложит идеи активностей, методы оценивания и готовый план урока за секунды.
           </p>
 
-          {/* Две главные кнопки */}
-          <div className="grid grid-cols-2 gap-3 mb-6 animate-fade-in-up delay-300">
+          {/* Три главные кнопки */}
+          <div className="grid grid-cols-3 gap-2 mb-3 animate-fade-in-up delay-300">
             {/* Генератор урока */}
             <button
               onClick={onStart}
-              className="flex flex-col items-center gap-2 px-4 py-4 rounded-2xl bg-primary text-white font-body font-semibold hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/25 active:scale-95 group"
+              className="flex flex-col items-center gap-2 px-2 py-4 rounded-2xl bg-primary text-white font-body font-semibold hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/25 active:scale-95 group"
             >
-              <span className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                <Icon name="BookOpen" size={20} className="text-white" />
+              <span className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                <Icon name="BookOpen" size={18} className="text-white" />
               </span>
-              <span className="text-sm font-bold">Генератор урока</span>
+              <span className="text-xs font-bold text-center leading-tight">Генератор урока</span>
               {!isPaid && lessonsLeft !== null && (
                 <span className="text-xs font-body font-normal opacity-80">
-                  {lessonsLeft > 0 ? `Осталось бесплатно: ${lessonsLeft}` : "Лимит исчерпан"}
+                  {lessonsLeft > 0 ? `Осталось: ${lessonsLeft}` : "Лимит"}
                 </span>
               )}
-              {isPaid && <span className="text-xs font-body font-normal opacity-80">Безлимитно</span>}
+              {isPaid && <span className="text-xs font-body font-normal opacity-80">∞</span>}
             </button>
 
             {/* Генератор игры */}
             <button
               onClick={onGame}
-              className="flex flex-col items-center gap-2 px-4 py-4 rounded-2xl bg-amber text-foreground font-body font-semibold hover:bg-amber/90 transition-all hover:shadow-lg hover:shadow-amber/25 active:scale-95 group"
+              className="flex flex-col items-center gap-2 px-2 py-4 rounded-2xl bg-amber text-foreground font-body font-semibold hover:bg-amber/90 transition-all hover:shadow-lg hover:shadow-amber/25 active:scale-95 group"
             >
-              <span className="w-10 h-10 rounded-xl bg-black/10 flex items-center justify-center group-hover:bg-black/15 transition-colors">
-                <Icon name="Gamepad2" size={20} className="text-foreground" />
+              <span className="w-9 h-9 rounded-xl bg-black/10 flex items-center justify-center group-hover:bg-black/15 transition-colors">
+                <Icon name="Gamepad2" size={18} className="text-foreground" />
               </span>
-              <span className="text-sm font-bold">Генератор игры</span>
+              <span className="text-xs font-bold text-center leading-tight">Генератор игры</span>
               {!isPaid && gamesLeft !== null && (
                 <span className="text-xs font-body font-normal opacity-70">
-                  {gamesLeft > 0 ? `Осталось бесплатно: ${gamesLeft}` : "Лимит исчерпан"}
+                  {gamesLeft > 0 ? `Осталось: ${gamesLeft}` : "Лимит"}
                 </span>
               )}
-              {isPaid && <span className="text-xs font-body font-normal opacity-70">Безлимитно</span>}
+              {isPaid && <span className="text-xs font-body font-normal opacity-70">∞</span>}
             </button>
 
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 animate-fade-in-up delay-400">
+            {/* Генератор интенсива */}
             <button
               onClick={onIntensive}
-              className="flex items-center gap-2.5 px-3 py-3 rounded-2xl border border-border bg-white/60 hover:bg-white hover:border-primary/40 transition-all group"
+              className="flex flex-col items-center gap-2 px-2 py-4 rounded-2xl bg-violet text-white font-body font-semibold hover:bg-violet/90 transition-all hover:shadow-lg hover:shadow-violet/25 active:scale-95 group"
             >
-              <span className="w-8 h-8 rounded-xl bg-indigo-light flex items-center justify-center flex-shrink-0">
-                <Icon name="Zap" size={15} className="text-primary" />
+              <span className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                <Icon name="Zap" size={18} className="text-white" />
               </span>
-              <div className="text-left min-w-0">
-                <div className="font-body text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-tight">Интенсив / МК</div>
-                <div className="font-body text-xs text-muted-foreground">Воркшоп, тренинг</div>
-              </div>
-              <Icon name="ChevronRight" size={14} className="text-muted-foreground ml-auto group-hover:text-primary transition-colors flex-shrink-0" />
+              <span className="text-xs font-bold text-center leading-tight">Интенсив / МК</span>
+              {isPaid && <span className="text-xs font-body font-normal opacity-80">∞</span>}
+              {!isPaid && <span className="text-xs font-body font-normal opacity-80">Бесплатно</span>}
             </button>
+          </div>
 
+          {/* Самоанализ */}
+          <div className="animate-fade-in-up delay-400">
             <button
               onClick={onAnalysis}
-              className="flex items-center gap-2.5 px-3 py-3 rounded-2xl border border-border bg-white/60 hover:bg-white hover:border-teal/40 transition-all group"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl border border-border bg-white/60 hover:bg-white hover:border-teal/40 transition-all group"
             >
               <span className="w-8 h-8 rounded-xl bg-teal-light flex items-center justify-center flex-shrink-0">
-                <Icon name="BarChart2" size={15} className="text-teal" />
+                <Icon name="BarChart2" size={16} className="text-teal" />
               </span>
-              <div className="text-left min-w-0">
-                <div className="font-body text-sm font-semibold text-foreground group-hover:text-teal transition-colors leading-tight">Самоанализ</div>
-                <div className="font-body text-xs text-muted-foreground">Разбор урока</div>
+              <div className="text-left">
+                <div className="font-body text-sm font-semibold text-foreground group-hover:text-teal transition-colors">Самоанализ урока</div>
+                <div className="font-body text-xs text-muted-foreground">ИИ поможет разобрать урок</div>
               </div>
-              <Icon name="ChevronRight" size={14} className="text-muted-foreground ml-auto group-hover:text-teal transition-colors flex-shrink-0" />
+              <Icon name="ChevronRight" size={16} className="text-muted-foreground ml-auto group-hover:text-teal transition-colors" />
             </button>
           </div>
 
