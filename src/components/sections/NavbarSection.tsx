@@ -272,7 +272,7 @@ function Hero({ onStart, onGame, onAnalysis, onIntensive, onPayment, lessonsLeft
               <span className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
                 <Icon name="Zap" size={18} className="text-white" />
               </span>
-              <span className="text-xs font-bold text-center leading-tight">Интенсив / МК</span>
+              <span className="text-xs font-bold text-center leading-tight">Генератор интенсивов и мастер-классов</span>
               {!isPaid && lessonsLeft !== null && (
                 <div className="w-full px-1 space-y-0.5">
                   <div className="h-1 w-full bg-white/20 rounded-full overflow-hidden">
