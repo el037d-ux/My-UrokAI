@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 API_URL = "https://api.aitunnel.ru/v1/chat/completions"
 MODEL = "gpt-4o-mini"
 SCHEMA = os.environ.get('MAIN_DB_SCHEMA', 't_p75689129_landing_chatbot_desi')
-FREE_LIMITS = {'lessons': 5, 'games': 5, 'analyses': 0}
+FREE_LIMITS = {'lessons': 3, 'games': 3, 'analyses': 0}
 
 CORS_HEADERS = {
     'Access-Control-Allow-Origin': '*',

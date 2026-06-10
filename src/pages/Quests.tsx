@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
+import { useUser } from "@/context/UserContext";
+import PaymentModal from "@/components/PaymentModal";
 
 const SPECIAL_QUESTS = [
   {
@@ -336,8 +338,59 @@ const feedbackStyle = {
   bad: "bg-red-50 border-red-200",
 };
 
+function LockedSpecialCard({ q, onUnlock }: { q: typeof SPECIAL_QUESTS[0]; onUnlock: () => void }) {
+  return (
+    <div className="w-full bg-slate-50 rounded-2xl p-4 text-left flex items-center gap-4 mt-2 opacity-80">
+      <span className={`text-2xl w-12 h-12 rounded-xl bg-gradient-to-br ${q.color} flex items-center justify-center shrink-0 shadow-md`}>
+        {q.icon}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="font-display text-sm font-bold text-foreground">{q.title}</div>
+        <p className="font-body text-xs text-muted-foreground leading-relaxed line-clamp-2 mt-0.5">{q.desc}</p>
+        <div className="mt-1.5 flex items-center gap-1 text-xs font-body font-semibold text-muted-foreground">
+          <Icon name="Lock" size={11} />
+          Только для подписчиков
+        </div>
+      </div>
+      <button
+        onClick={onUnlock}
+        className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-primary text-white font-body text-xs font-semibold hover:bg-primary/90 transition-all"
+      >
+        Открыть
+      </button>
+    </div>
+  );
+}
+
+function LockedNavCard({ q, onUnlock }: { q: typeof QUESTS[0]; onUnlock: () => void }) {
+  return (
+    <div className="w-full bg-slate-50 rounded-2xl p-4 text-left flex items-center gap-4 mt-2 opacity-80">
+      <span className={`text-2xl w-12 h-12 rounded-xl bg-gradient-to-br ${q.color} flex items-center justify-center shrink-0 shadow-md`}>
+        {q.icon}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="font-display text-sm font-bold text-foreground">{q.title}</div>
+        <p className="font-body text-xs text-muted-foreground leading-relaxed line-clamp-2 mt-0.5">{q.desc}</p>
+        <div className="mt-1.5 flex items-center gap-1 text-xs font-body font-semibold text-muted-foreground">
+          <Icon name="Lock" size={11} />
+          Только для подписчиков
+        </div>
+      </div>
+      <button
+        onClick={onUnlock}
+        className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-primary text-white font-body text-xs font-semibold hover:bg-primary/90 transition-all"
+      >
+        Открыть
+      </button>
+    </div>
+  );
+}
+
 export default function Quests() {
   const navigate = useNavigate();
+  const { status } = useUser();
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const isPaid = status?.plan !== "free";
   const [screen, setScreen] = useState<Screen>("lobby");
   const [questId, setQuestId] = useState<string>("fin");
   const [current, setCurrent] = useState(0);
@@ -380,6 +433,7 @@ export default function Quests() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-indigo-light/30 to-teal-light/20 flex flex-col">
+      {paymentOpen && <PaymentModal onClose={() => setPaymentOpen(false)} />}
       {/* Шапка */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-border">
         <div className="container max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -411,6 +465,17 @@ export default function Quests() {
                 <p className="font-body text-sm sm:text-base text-muted-foreground">Выберите предмет и начните тренировку</p>
               </div>
 
+              {/* Банер подписки */}
+              {!isPaid && (
+                <div className="mb-5 px-4 py-3 rounded-2xl bg-indigo-light border border-indigo-mid flex items-center gap-3">
+                  <Icon name="Lock" size={16} className="text-primary flex-shrink-0" />
+                  <p className="font-body text-sm text-foreground flex-1">Тренажёры доступны по подписке. Мудрая минутка — бесплатно.</p>
+                  <button onClick={() => setPaymentOpen(true)} className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-primary text-white font-body text-xs font-semibold hover:bg-primary/90 transition-all">
+                    Открыть
+                  </button>
+                </div>
+              )}
+
               <div className="space-y-6">
 
                 {/* Информационные системы */}
@@ -419,9 +484,19 @@ export default function Quests() {
                   title="Информационные системы"
                   color="from-slate-600 to-blue-700"
                 >
-                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "oodb")!} navigate={navigate} />
-                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "array-trainer")!} navigate={navigate} />
-                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "it-project-simulator")!} navigate={navigate} />
+                  {isPaid ? (
+                    <>
+                      <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "oodb")!} navigate={navigate} />
+                      <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "array-trainer")!} navigate={navigate} />
+                      <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "it-project-simulator")!} navigate={navigate} />
+                    </>
+                  ) : (
+                    <>
+                      <LockedSpecialCard q={SPECIAL_QUESTS.find(q => q.id === "oodb")!} onUnlock={() => setPaymentOpen(true)} />
+                      <LockedSpecialCard q={SPECIAL_QUESTS.find(q => q.id === "array-trainer")!} onUnlock={() => setPaymentOpen(true)} />
+                      <LockedSpecialCard q={SPECIAL_QUESTS.find(q => q.id === "it-project-simulator")!} onUnlock={() => setPaymentOpen(true)} />
+                    </>
+                  )}
                 </CategoryFolder>
 
                 {/* Информатика */}
@@ -430,7 +505,11 @@ export default function Quests() {
                   title="Информатика"
                   color="from-violet-600 to-purple-700"
                 >
-                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "information-work")!} navigate={navigate} />
+                  {isPaid ? (
+                    <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "information-work")!} navigate={navigate} />
+                  ) : (
+                    <LockedSpecialCard q={SPECIAL_QUESTS.find(q => q.id === "information-work")!} onUnlock={() => setPaymentOpen(true)} />
+                  )}
                 </CategoryFolder>
 
                 {/* Математика */}
@@ -439,7 +518,11 @@ export default function Quests() {
                   title="Математика"
                   color="from-orange-500 to-amber-600"
                 >
-                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "math-logarithms")!} navigate={navigate} />
+                  {isPaid ? (
+                    <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "math-logarithms")!} navigate={navigate} />
+                  ) : (
+                    <LockedSpecialCard q={SPECIAL_QUESTS.find(q => q.id === "math-logarithms")!} onUnlock={() => setPaymentOpen(true)} />
+                  )}
                 </CategoryFolder>
 
                 {/* Проектный менеджмент */}
@@ -448,10 +531,14 @@ export default function Quests() {
                   title="Проектный менеджмент"
                   color="from-indigo-500 to-violet-600"
                 >
-                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "smart-goals")!} navigate={navigate} />
+                  {isPaid ? (
+                    <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "smart-goals")!} navigate={navigate} />
+                  ) : (
+                    <LockedSpecialCard q={SPECIAL_QUESTS.find(q => q.id === "smart-goals")!} onUnlock={() => setPaymentOpen(true)} />
+                  )}
                 </CategoryFolder>
 
-                {/* Метапредмет */}
+                {/* Метапредмет — бесплатно (Мудрая минутка) */}
                 <CategoryFolder
                   emoji="🌐"
                   title="Метапредмет"

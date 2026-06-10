@@ -361,16 +361,39 @@ def handler(event: dict, context) -> dict:
                             cur.execute(f"INSERT INTO {SCHEMA}.usage_counts (user_id) VALUES (%s)", (user_id,))
                             cur.execute(f"INSERT INTO {SCHEMA}.subscriptions (user_id, plan) VALUES (%s, 'free')", (user_id,))
 
-                        days = PLAN_DAYS.get(plan_id, 7)
-                        sub_expires = datetime.now(timezone.utc) + timedelta(days=days)
-                        cur.execute(f"UPDATE {SCHEMA}.subscriptions SET is_active=FALSE WHERE user_id=%s AND plan!='free'", (user_id,))
+                        # Проверяем: уже активирована подписка по этому payment_id?
                         cur.execute(
-                            f"INSERT INTO {SCHEMA}.subscriptions (user_id, plan, is_active, expires_at) VALUES (%s, %s, TRUE, %s) ON CONFLICT DO NOTHING",
-                            (user_id, plan_id, sub_expires)
+                            f"SELECT s.id FROM {SCHEMA}.sessions s WHERE s.user_id=%s AND s.created_at > NOW() - INTERVAL '10 minutes' ORDER BY s.created_at DESC LIMIT 1",
+                            (user_id,)
                         )
-                        session_token = secrets.token_hex(32)
-                        cur.execute(f"INSERT INTO {SCHEMA}.sessions (user_id, token) VALUES (%s, %s)", (user_id, session_token))
-                        conn.commit()
+                        existing_session = cur.fetchone()
+
+                        cur.execute(
+                            f"SELECT is_active FROM {SCHEMA}.subscriptions WHERE user_id=%s AND plan=%s AND is_active=TRUE LIMIT 1",
+                            (user_id, plan_id)
+                        )
+                        already_activated = cur.fetchone()
+
+                        if already_activated and existing_session:
+                            # Уже активировано — возвращаем существующую сессию
+                            cur.execute(
+                                f"SELECT token FROM {SCHEMA}.sessions WHERE user_id=%s ORDER BY created_at DESC LIMIT 1",
+                                (user_id,)
+                            )
+                            token_row = cur.fetchone()
+                            session_token = token_row[0] if token_row else secrets.token_hex(32)
+                        else:
+                            days = PLAN_DAYS.get(plan_id, 7)
+                            sub_expires = datetime.now(timezone.utc) + timedelta(days=days)
+                            cur.execute(f"UPDATE {SCHEMA}.subscriptions SET is_active=FALSE WHERE user_id=%s AND plan!='free'", (user_id,))
+                            cur.execute(
+                                f"INSERT INTO {SCHEMA}.subscriptions (user_id, plan, is_active, expires_at) VALUES (%s, %s, TRUE, %s)",
+                                (user_id, plan_id, sub_expires)
+                            )
+                            session_token = secrets.token_hex(32)
+                            cur.execute(f"INSERT INTO {SCHEMA}.sessions (user_id, token) VALUES (%s, %s)", (user_id, session_token))
+                            conn.commit()
+
                         return {
                             'statusCode': 200,
                             'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},

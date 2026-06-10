@@ -9,8 +9,8 @@ import AuthModal from "@/components/AuthModal";
 import PaymentModal from "@/components/PaymentModal";
 import { useUser } from "@/context/UserContext";
 
-const FREE_LESSONS = 5;
-const FREE_GAMES = 5;
+const FREE_LESSONS = 3;
+const FREE_GAMES = 3;
 
 function useSectionFade() {
   useEffect(() => {
@@ -107,8 +107,8 @@ export default function Index() {
     token &&
     status &&
     status.plan === "free" &&
-    status.usage.lessons >= 5 &&
-    status.usage.games >= 5
+    status.usage.lessons >= 3 &&
+    status.usage.games >= 3
   );
 
   return (
@@ -129,7 +129,7 @@ export default function Index() {
               {isSubscriptionExpired
                 ? <span className="text-destructive font-semibold">Подписка истекла</span>
                 : status.plan === "free"
-                  ? `Уроки: ${status.usage.lessons}/5 · Игры: ${status.usage.games}/5`
+                  ? `Уроки: ${status.usage.lessons}/3 · Игры: ${status.usage.games}/3`
                   : status.expires_at
                     ? `До ${new Date(status.expires_at).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}`
                     : "Подписка активна"}
