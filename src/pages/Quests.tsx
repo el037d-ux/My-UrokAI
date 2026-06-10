@@ -13,6 +13,15 @@ const SPECIAL_QUESTS = [
     path: "/quests/oodb",
   },
   {
+    id: "it-project-simulator",
+    icon: "🚀",
+    title: "IT Project Simulator",
+    desc: "Командная игра по управлению IT-проектами. 4 этапа: инициация, планирование, кризис, релиз. До 4 команд, система баллов и рефлексия.",
+    color: "from-blue-600 to-indigo-700",
+    count: "4 этапа",
+    path: "/quests/it-project-simulator",
+  },
+  {
     id: "array-trainer",
     icon: "🧮",
     title: "Работа с массивом",
@@ -412,6 +421,7 @@ export default function Quests() {
                 >
                   <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "oodb")!} navigate={navigate} />
                   <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "array-trainer")!} navigate={navigate} />
+                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "it-project-simulator")!} navigate={navigate} />
                 </CategoryFolder>
 
                 {/* Информатика */}
