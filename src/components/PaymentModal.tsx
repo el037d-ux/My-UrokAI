@@ -16,6 +16,7 @@ export default function PaymentModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<Step>("plan");
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [email, setEmail] = useState(status?.user?.email || "");
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [paymentId, setPaymentId] = useState("");
@@ -41,6 +42,10 @@ export default function PaymentModal({ onClose }: { onClose: () => void }) {
     setError("");
     if (!email.trim() || !email.includes("@")) {
       setError("Введите корректный email");
+      return;
+    }
+    if (!agreed) {
+      setError("Необходимо принять пользовательское соглашение");
       return;
     }
     setLoading(true);
@@ -189,11 +194,26 @@ export default function PaymentModal({ onClose }: { onClose: () => void }) {
                 />
               </div>
 
+              <label className="flex items-start gap-2.5 cursor-pointer group">
+                <div
+                  onClick={() => { setAgreed(a => !a); setError(""); }}
+                  className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${agreed ? "bg-primary border-primary" : "border-border group-hover:border-primary/50"}`}
+                >
+                  {agreed && <Icon name="Check" size={12} className="text-white" />}
+                </div>
+                <span className="font-body text-xs text-muted-foreground leading-relaxed">
+                  Нажимая «Перейти к оплате», я принимаю{" "}
+                  <a href="/terms" target="_blank" className="text-primary underline hover:no-underline">пользовательское соглашение</a>
+                  {" "}и{" "}
+                  <a href="/privacy" target="_blank" className="text-primary underline hover:no-underline">политику конфиденциальности</a>
+                </span>
+              </label>
+
               {error && <div className="p-3 rounded-xl bg-destructive/10 border border-destructive text-destructive text-sm font-body">{error}</div>}
 
               <button
                 onClick={handleStartPayment}
-                disabled={loading}
+                disabled={loading || !agreed}
                 className="w-full py-3 rounded-xl bg-primary text-white font-body font-bold text-sm hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95"
               >
                 {loading ? "Создаём платёж..." : "Перейти к оплате"}

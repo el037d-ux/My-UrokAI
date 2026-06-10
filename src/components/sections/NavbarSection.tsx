@@ -230,9 +230,14 @@ function Hero({ onStart, onGame, onAnalysis, onIntensive, onPayment, lessonsLeft
               </span>
               <span className="text-xs font-bold text-center leading-tight">Генератор урока</span>
               {!isPaid && lessonsLeft !== null && (
-                <span className="text-xs font-body font-normal opacity-80">
-                  {lessonsLeft > 0 ? `Осталось: ${lessonsLeft}` : "Лимит"}
-                </span>
+                <div className="w-full px-1 space-y-0.5">
+                  <div className="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-white rounded-full transition-all" style={{ width: `${(lessonsLeft / 3) * 100}%` }} />
+                  </div>
+                  <span className="text-xs font-body font-normal opacity-80 block text-center">
+                    {lessonsLeft > 0 ? `${lessonsLeft}/3` : "Лимит исчерпан"}
+                  </span>
+                </div>
               )}
               {isPaid && <span className="text-xs font-body font-normal opacity-80">∞</span>}
             </button>
@@ -247,9 +252,14 @@ function Hero({ onStart, onGame, onAnalysis, onIntensive, onPayment, lessonsLeft
               </span>
               <span className="text-xs font-bold text-center leading-tight">Генератор игры</span>
               {!isPaid && gamesLeft !== null && (
-                <span className="text-xs font-body font-normal opacity-70">
-                  {gamesLeft > 0 ? `Осталось: ${gamesLeft}` : "Лимит"}
-                </span>
+                <div className="w-full px-1 space-y-0.5">
+                  <div className="h-1 w-full bg-black/15 rounded-full overflow-hidden">
+                    <div className="h-full bg-foreground/60 rounded-full transition-all" style={{ width: `${(gamesLeft / 3) * 100}%` }} />
+                  </div>
+                  <span className="text-xs font-body font-normal opacity-70 block text-center">
+                    {gamesLeft > 0 ? `${gamesLeft}/3` : "Лимит исчерпан"}
+                  </span>
+                </div>
               )}
               {isPaid && <span className="text-xs font-body font-normal opacity-70">∞</span>}
             </button>
@@ -263,8 +273,17 @@ function Hero({ onStart, onGame, onAnalysis, onIntensive, onPayment, lessonsLeft
                 <Icon name="Zap" size={18} className="text-white" />
               </span>
               <span className="text-xs font-bold text-center leading-tight">Интенсив / МК</span>
+              {!isPaid && lessonsLeft !== null && (
+                <div className="w-full px-1 space-y-0.5">
+                  <div className="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-white rounded-full transition-all" style={{ width: `${(lessonsLeft / 3) * 100}%` }} />
+                  </div>
+                  <span className="text-xs font-body font-normal opacity-80 block text-center">
+                    {lessonsLeft > 0 ? `${lessonsLeft}/3` : "Лимит исчерпан"}
+                  </span>
+                </div>
+              )}
               {isPaid && <span className="text-xs font-body font-normal opacity-80">∞</span>}
-              {!isPaid && <span className="text-xs font-body font-normal opacity-80">Бесплатно</span>}
             </button>
           </div>
 
