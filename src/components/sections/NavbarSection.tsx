@@ -193,7 +193,7 @@ function Navbar({ onStart, onAuth, onPayment, onProfile }: { onStart: () => void
   );
 }
 
-function Hero({ onStart, onGame, onAnalysis, onPayment, lessonsLeft, gamesLeft, isPaid }: { onStart: () => void; onGame: () => void; onAnalysis: () => void; onPayment: () => void; lessonsLeft: number | null; gamesLeft: number | null; isPaid: boolean }) {
+function Hero({ onStart, onGame, onAnalysis, onIntensive, onPayment, lessonsLeft, gamesLeft, isPaid }: { onStart: () => void; onGame: () => void; onAnalysis: () => void; onIntensive: () => void; onPayment: () => void; lessonsLeft: number | null; gamesLeft: number | null; isPaid: boolean }) {
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-indigo-light/40 to-teal-light/30 -z-10" />
@@ -256,19 +256,33 @@ function Hero({ onStart, onGame, onAnalysis, onPayment, lessonsLeft, gamesLeft, 
 
           </div>
 
-          <div className="animate-fade-in-up delay-400">
+          <div className="grid grid-cols-2 gap-2 animate-fade-in-up delay-400">
+            <button
+              onClick={onIntensive}
+              className="flex items-center gap-2.5 px-3 py-3 rounded-2xl border border-border bg-white/60 hover:bg-white hover:border-primary/40 transition-all group"
+            >
+              <span className="w-8 h-8 rounded-xl bg-indigo-light flex items-center justify-center flex-shrink-0">
+                <Icon name="Zap" size={15} className="text-primary" />
+              </span>
+              <div className="text-left min-w-0">
+                <div className="font-body text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-tight">Интенсив / МК</div>
+                <div className="font-body text-xs text-muted-foreground">Воркшоп, тренинг</div>
+              </div>
+              <Icon name="ChevronRight" size={14} className="text-muted-foreground ml-auto group-hover:text-primary transition-colors flex-shrink-0" />
+            </button>
+
             <button
               onClick={onAnalysis}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl border border-border bg-white/60 hover:bg-white hover:border-teal/40 transition-all group"
+              className="flex items-center gap-2.5 px-3 py-3 rounded-2xl border border-border bg-white/60 hover:bg-white hover:border-teal/40 transition-all group"
             >
               <span className="w-8 h-8 rounded-xl bg-teal-light flex items-center justify-center flex-shrink-0">
-                <Icon name="BarChart2" size={16} className="text-teal" />
+                <Icon name="BarChart2" size={15} className="text-teal" />
               </span>
-              <div className="text-left">
-                <div className="font-body text-sm font-semibold text-foreground group-hover:text-teal transition-colors">Самоанализ урока</div>
-                <div className="font-body text-xs text-muted-foreground">ИИ поможет разобрать урок</div>
+              <div className="text-left min-w-0">
+                <div className="font-body text-sm font-semibold text-foreground group-hover:text-teal transition-colors leading-tight">Самоанализ</div>
+                <div className="font-body text-xs text-muted-foreground">Разбор урока</div>
               </div>
-              <Icon name="ChevronRight" size={16} className="text-muted-foreground ml-auto group-hover:text-teal transition-colors" />
+              <Icon name="ChevronRight" size={14} className="text-muted-foreground ml-auto group-hover:text-teal transition-colors flex-shrink-0" />
             </button>
           </div>
 

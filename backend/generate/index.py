@@ -304,6 +304,127 @@ def handle_analysis(api_key, body):
     return ok({'ok': True, 'analysis': analysis})
 
 
+def handle_intensive(api_key, body):
+    fmt = body.get('format', 'Интенсив')
+    duration = body.get('duration', '2 часа')
+    conduct = body.get('conduct', 'Офлайн')
+    participants = body.get('participants', '15–20 человек')
+    audience = body.get('audience', '')
+    level = body.get('level', 'Смешанный')
+    goal = body.get('goal', '')
+
+    prompt = f"""Ты опытный методист и фасилитатор с 15-летним стажем проведения интенсивов и мастер-классов.
+
+📋 ИСХОДНЫЕ ДАННЫЕ:
+- Тип мероприятия: {fmt}
+- Целевая аудитория: {audience}
+- Длительность: {duration}
+- Формат проведения: {conduct}
+- Количество участников: {participants}
+- Цель занятия: {goal}
+- Уровень подготовки: {level}
+
+Создай подробную программу строго в JSON-формате (только JSON, без markdown):
+{{
+  "title": "Креативное название мероприятия",
+  "slogan": "Короткий слоган/девиз",
+  "format": "{fmt}",
+  "duration": "{duration}",
+  "audience": "{audience}",
+  "goals": {{
+    "educational": "Образовательная цель",
+    "developmental": "Развивающая цель",
+    "personal": "Воспитательная/личностная цель"
+  }},
+  "expected_results": [
+    "Результат 1 — что участник унесёт с собой",
+    "Результат 2",
+    "Результат 3",
+    "Результат 4"
+  ],
+  "facilitator_competencies": ["Компетенция ведущего 1", "Компетенция 2", "Компетенция 3"],
+  "program": [
+    {{
+      "block": "Вводная часть (ледокол, мотивация)",
+      "duration": "X мин",
+      "content": "Подробное содержание блока",
+      "methods": "Методы и приёмы",
+      "materials": "Необходимые материалы",
+      "facilitator_role": "Роль ведущего",
+      "participant_role": "Роль участников"
+    }},
+    {{
+      "block": "Теоретический блок",
+      "duration": "X мин",
+      "content": "Подробное содержание",
+      "methods": "Методы",
+      "materials": "Материалы",
+      "facilitator_role": "Роль ведущего",
+      "participant_role": "Роль участников"
+    }},
+    {{
+      "block": "Практический блок",
+      "duration": "X мин",
+      "content": "Практические упражнения, кейсы",
+      "methods": "Методы",
+      "materials": "Материалы",
+      "facilitator_role": "Роль ведущего",
+      "participant_role": "Роль участников"
+    }},
+    {{
+      "block": "Рефлексия и итоги",
+      "duration": "X мин",
+      "content": "Подведение итогов",
+      "methods": "Методы рефлексии",
+      "materials": "Материалы",
+      "facilitator_role": "Роль ведущего",
+      "participant_role": "Роль участников"
+    }}
+  ],
+  "interactive_elements": [
+    {{"type": "Геймификация", "description": "Подробное описание игрового элемента"}},
+    {{"type": "Работа в группах", "description": "Описание групповой работы"}},
+    {{"type": "Практический кейс", "description": "Описание кейса"}},
+    {{"type": "Элемент соревновательности", "description": "Описание соревновательного элемента"}}
+  ],
+  "equipment": {{
+    "hardware": ["Проектор", "Флипчарт", "другое оборудование"],
+    "digital_tools": ["Mentimeter / Kahoot / Miro и т.д."],
+    "handouts": ["Чек-лист", "Памятка", "Шаблон — описание что именно"]
+  }},
+  "assessment": {{
+    "success_criteria": "Как понять что цели достигнуты",
+    "feedback_forms": ["Форма 1", "Форма 2", "Форма 3"],
+    "skill_evaluation": "Методы оценки полученных навыков"
+  }},
+  "highlights": {{
+    "attention_tricks": ["Приём 1 для удержания внимания", "Приём 2", "Приём 3"],
+    "homework": "Идея для ДЗ или продолжения",
+    "online_adaptation": "Как адаптировать под онлайн-формат",
+    "risks": [
+      {{"risk": "Риск 1", "prevention": "Как предотвратить"}},
+      {{"risk": "Риск 2", "prevention": "Как предотвратить"}}
+    ]
+  }}
+}}
+
+Требования:
+- Теория не более 30%, практика не менее 70%
+- Сумма времени блоков = {duration}
+- Конкретные сценарии упражнений, не абстрактные
+- Surprise-эффект: хотя бы 1 неожиданный приём
+- Учти формат проведения: {conduct}
+- Аудитория: {audience}, уровень: {level}"""
+
+    content = call_ai(api_key, [
+        {'role': 'system', 'content': 'Ты профессиональный методист и фасилитатор. Создаёшь детальные программы интенсивов, мастер-классов и воркшопов. Отвечаешь только валидным JSON без markdown-блоков.'},
+        {'role': 'user', 'content': prompt}
+    ], max_tokens=3000)
+
+    plan = json.loads(strip_json(content))
+    return ok({'ok': True, 'plan': plan})
+
+
 def check_limit(token, resource):
     """Проверяет лимит пользователя. Возвращает (allowed: bool, error_msg: str|None)."""
     if not token:
@@ -368,7 +489,7 @@ def handler(event: dict, context) -> dict:
     if not token:
         token = (event.get('headers') or {}).get('Authorization', '').replace('Bearer ', '').strip()
 
-    resource_map = {'lesson': 'lessons', 'game': 'games', 'analysis': 'analyses'}
+    resource_map = {'lesson': 'lessons', 'game': 'games', 'analysis': 'analyses', 'intensive': 'lessons'}
     resource = resource_map.get(action)
     if resource:
         allowed, limit_err = check_limit(token, resource)
@@ -387,5 +508,7 @@ def handler(event: dict, context) -> dict:
         return handle_game(api_key, body)
     elif action == 'analysis':
         return handle_analysis(api_key, body)
+    elif action == 'intensive':
+        return handle_intensive(api_key, body)
     else:
         return err(f'Неизвестный action: {action}')
