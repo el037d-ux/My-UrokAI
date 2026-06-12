@@ -94,7 +94,7 @@ function WiseButton() {
   );
 }
 
-const HERO_IMAGE = "https://cdn.poehali.dev/projects/3a27d5a9-016a-43ab-946d-4c4fe8129705/bucket/13908e2a-792c-4cda-8d6f-faa126efc861.png";
+const HERO_IMAGE = "https://cdn.poehali.dev/projects/3a27d5a9-016a-43ab-946d-4c4fe8129705/bucket/d7b8e0c8-ca1d-4770-a1e4-8dc8904eb5c6.png";
 
 function Navbar({ onStart, onAuth, onPayment, onProfile }: { onStart: () => void; onAuth: () => void; onPayment: () => void; onProfile: () => void }) {
   const [scrolled, setScrolled] = useState(false);
@@ -307,8 +307,8 @@ function Hero({ onStart, onGame, onAnalysis, onIntensive, onPayment, lessonsLeft
           <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-primary/10 animate-float">
             <img
               src={HERO_IMAGE}
-              alt="УрокАИ — робот с планшетом"
-              className="w-full h-[480px] object-contain bg-gradient-to-br from-blue-900 to-blue-700"
+              alt="Учитель с ИИ на доске"
+              className="w-full h-[480px] object-cover"
             />
           </div>
 
