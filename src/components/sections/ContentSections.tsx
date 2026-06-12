@@ -105,6 +105,70 @@ function About() {
           ))}
         </div>
 
+        {/* Миссия */}
+        <div className="section-fade mt-16 sm:mt-24 rounded-3xl bg-gradient-to-br from-primary/5 to-teal-light/40 border border-primary/10 p-8 sm:p-12">
+          <div className="max-w-3xl mx-auto text-center">
+            <span className="inline-block px-3 py-1 rounded-full badge-indigo text-xs font-body font-semibold uppercase tracking-wider mb-4">Наша миссия</span>
+            <h3 className="font-display text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-4">
+              Персональный AI-ассистент для каждого педагога
+            </h3>
+            <p className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed">
+              Дать каждому педагогу и тьютору инструмент, который генерирует готовые методические материалы — от интерактивных игр до сложных мастер-классов — в 10 раз быстрее.
+            </p>
+          </div>
+        </div>
+
+        {/* Боли и решения */}
+        <div className="section-fade mt-12 sm:mt-16 grid md:grid-cols-2 gap-6">
+          <div className="rounded-2xl border border-border bg-white p-6 sm:p-8">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-red-100 text-red-500 flex items-center justify-center">
+                <Icon name="Frown" size={20} />
+              </div>
+              <h4 className="font-body font-bold text-foreground text-lg">Знакомо?</h4>
+            </div>
+            <ul className="space-y-3">
+              {[
+                "Тратите вечера на подготовку к завтрашним урокам",
+                "Не хватает времени на творчество",
+                "Ученики скучают на стандартных занятиях",
+                "Хочется чего-то нового, но нет сил придумывать",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2 font-body text-sm text-muted-foreground">
+                  <Icon name="X" size={16} className="mt-0.5 text-red-400 shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-white p-6 sm:p-8">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-teal-light text-teal flex items-center justify-center">
+                <Icon name="Sparkles" size={20} />
+              </div>
+              <h4 className="font-body font-bold text-foreground text-lg">«УрокАИ» решает это</h4>
+            </div>
+            <ul className="space-y-3">
+              {[
+                "Верните себе вечера — AI сделает черновую работу за вас",
+                "Вдохновляйтесь — десятки идей для уроков за минуту",
+                "Вовлекайте учеников — игры и интерактивы, которые запомнят",
+                "Растите профессионально — тратьте время на развитие, не на копипаст",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2 font-body text-sm text-foreground">
+                  <Icon name="Check" size={16} className="mt-0.5 text-teal shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* ИНН и юридическая информация */}
+        <div className="section-fade mt-8 text-center">
+          <p className="font-body text-xs text-muted-foreground">ИНН 110105729752</p>
+        </div>
 
       </div>
     </section>
