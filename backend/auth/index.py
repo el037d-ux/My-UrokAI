@@ -298,7 +298,7 @@ def handler(event: dict, context) -> dict:
                     }]
                 }
 
-            shop_id = os.environ['API_KEY_ID']
+            shop_id = os.environ.get('YKASSA_SHOP_ID') or os.environ['API_KEY_ID']
             secret_key = os.environ['API_YKASSA']
             credentials = base64.b64encode(f"{shop_id}:{secret_key}".encode()).decode()
             req = urllib.request.Request(
@@ -328,7 +328,7 @@ def handler(event: dict, context) -> dict:
             if not payment_id:
                 return {'statusCode': 400, 'headers': {'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'ok': False, 'error': 'Нет payment_id'})}
 
-            shop_id = os.environ['API_KEY_ID']
+            shop_id = os.environ.get('YKASSA_SHOP_ID') or os.environ['API_KEY_ID']
             secret_key = os.environ['API_YKASSA']
             credentials = base64.b64encode(f"{shop_id}:{secret_key}".encode()).decode()
             req = urllib.request.Request(
