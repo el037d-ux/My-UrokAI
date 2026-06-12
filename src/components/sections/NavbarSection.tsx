@@ -112,6 +112,7 @@ function Navbar({ onStart, onAuth, onPayment, onProfile }: { onStart: () => void
     { href: "#about", label: "О сервисе" },
     { href: "#demo", label: "Примеры" },
     { href: "#faq", label: "Вопросы" },
+    { href: "#contacts", label: "Контакты" },
   ];
 
   return (
