@@ -567,7 +567,6 @@ export default function Quests() {
                   title="Метапредмет"
                   color="from-teal-500 to-emerald-600"
                 >
-                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "team-randomizer")!} navigate={navigate} />
                   {QUESTS.map((q) => (
                     <NavCard key={q.id} q={q} onStart={() => startQuest(q.id)} />
                   ))}
