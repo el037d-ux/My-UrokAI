@@ -94,7 +94,7 @@ function WiseButton() {
   );
 }
 
-const HERO_IMAGE = "https://cdn.poehali.dev/projects/3a27d5a9-016a-43ab-946d-4c4fe8129705/bucket/d7b8e0c8-ca1d-4770-a1e4-8dc8904eb5c6.png";
+const HERO_IMAGE = "https://cdn.poehali.dev/projects/3a27d5a9-016a-43ab-946d-4c4fe8129705/bucket/e0ca55da-2a41-429a-bf64-1e5eb0f5d58d.png";
 
 function Navbar({ onStart, onAuth, onPayment, onProfile }: { onStart: () => void; onAuth: () => void; onPayment: () => void; onProfile: () => void }) {
   const [scrolled, setScrolled] = useState(false);
