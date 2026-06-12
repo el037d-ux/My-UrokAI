@@ -59,6 +59,15 @@ const SPECIAL_QUESTS = [
     count: "60 секунд",
     path: "/quests/math-logarithms",
   },
+  {
+    id: "math-backward-analysis",
+    icon: "🧠",
+    title: "Анализ с конца",
+    desc: "Тренажёр по методу обратного анализа: монеты, яблоки, улитки. Решай задачи, двигаясь от результата к условию.",
+    color: "from-orange-500 to-amber-600",
+    count: "3 задачи",
+    path: "/quests/math-backward-analysis",
+  },
 ];
 
 // ── Финансовый навигатор ─────────────────────────────────────────────────────
@@ -522,6 +531,11 @@ export default function Quests() {
                     <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "math-logarithms")!} navigate={navigate} />
                   ) : (
                     <LockedSpecialCard q={SPECIAL_QUESTS.find(q => q.id === "math-logarithms")!} onUnlock={() => setPaymentOpen(true)} />
+                  )}
+                  {isPaid ? (
+                    <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "math-backward-analysis")!} navigate={navigate} />
+                  ) : (
+                    <LockedSpecialCard q={SPECIAL_QUESTS.find(q => q.id === "math-backward-analysis")!} onUnlock={() => setPaymentOpen(true)} />
                   )}
                 </CategoryFolder>
 
