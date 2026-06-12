@@ -143,6 +143,10 @@ function Navbar({ onStart, onAuth, onPayment, onProfile }: { onStart: () => void
             <Icon name="Swords" size={14} className="text-amber" />
             Тренажёры
           </button>
+          <button onClick={() => navigate("/quests/team-randomizer")} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-teal/30 text-sm font-body font-semibold text-teal hover:border-teal/50 hover:bg-teal/5 transition-all">
+            <Icon name="Shuffle" size={14} className="text-teal" />
+            Рандомайзер
+          </button>
           <WiseButton />
 
           {token ? (
@@ -176,6 +180,9 @@ function Navbar({ onStart, onAuth, onPayment, onProfile }: { onStart: () => void
           <div className="pt-2 space-y-2">
             <button onClick={() => { navigate("/quests"); setMenuOpen(false); }} className="w-full py-2.5 text-sm font-body font-semibold border border-amber/30 text-amber rounded-xl flex items-center justify-center gap-2">
               <Icon name="Swords" size={14} />Тренажёры
+            </button>
+            <button onClick={() => { navigate("/quests/team-randomizer"); setMenuOpen(false); }} className="w-full py-2.5 text-sm font-body font-semibold border border-teal/30 text-teal rounded-xl flex items-center justify-center gap-2">
+              <Icon name="Shuffle" size={14} />Рандомайзер команд
             </button>
 
             {token ? (
