@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/context/UserContext";
 import Icon from "@/components/ui/icon";
-import { Spinner, PLAN_LABELS, PLAN_COLORS, TABS, type Tab } from "./profile/ProfileShared";
+import { Spinner, PLAN_LABELS, PLAN_COLORS, TABS, EXPORT_EXCEL_URL, ADMIN_EMAIL, type Tab } from "./profile/ProfileShared";
 import { ProfileTab } from "./profile/ProfileTab";
 import { HistoryTab, SavedTab } from "./profile/ProfileHistoryAndSaved";
 import { SettingsTab } from "./profile/ProfileSettings";
@@ -11,6 +11,24 @@ export default function Profile() {
   const { status, token, loading, logout } = useUser();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("profile");
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportExcel = async () => {
+    if (!token) return;
+    setExporting(true);
+    try {
+      const res = await fetch(EXPORT_EXCEL_URL, { headers: { Authorization: `Bearer ${token}` } });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "УрокАИ.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !token) navigate("/");
@@ -55,10 +73,22 @@ export default function Profile() {
               </span>
             </div>
           </div>
-          <button onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-body font-medium text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-all flex-shrink-0">
-            <Icon name="LogOut" size={15} /> <span className="hidden sm:inline">Выйти</span>
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {user?.email === ADMIN_EMAIL && (
+              <button
+                onClick={handleExportExcel}
+                disabled={exporting}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-teal/40 bg-teal-light text-teal text-sm font-body font-medium hover:bg-teal/10 transition-all disabled:opacity-60"
+              >
+                <Icon name={exporting ? "Loader" : "FileDown"} size={15} />
+                <span className="hidden sm:inline">{exporting ? "Загрузка..." : "Excel"}</span>
+              </button>
+            )}
+            <button onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-body font-medium text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-all">
+              <Icon name="LogOut" size={15} /> <span className="hidden sm:inline">Выйти</span>
+            </button>
+          </div>
         </div>
 
         <div className="flex gap-1 p-1 bg-white rounded-2xl border border-border shadow-sm overflow-x-auto">

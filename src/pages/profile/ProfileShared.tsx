@@ -2,6 +2,8 @@ import Icon from "@/components/ui/icon";
 
 export const USER_STATUS_URL = "https://functions.poehali.dev/e173392a-d801-4fb1-8a22-1d4eae8245b0";
 export const AUTH_URL = "https://functions.poehali.dev/43173cf5-6a15-477a-b57b-72f11019ab4b";
+export const EXPORT_EXCEL_URL = "https://functions.poehali.dev/219a8e87-3ec1-4431-ae04-93709bd04b1f";
+export const ADMIN_EMAIL = "el037d@gmail.com";
 
 export const PLAN_LABELS: Record<string, string> = {
   free: "Бесплатный",
