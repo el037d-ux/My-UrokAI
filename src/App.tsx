@@ -18,6 +18,7 @@ import MathLogarithmsQuest from "./pages/MathLogarithmsQuest";
 import ArrayTrainerQuest from "./pages/ArrayTrainerQuest";
 import ItProjectSimulatorQuest from "./pages/ItProjectSimulatorQuest";
 import MathBackwardAnalysisQuest from "./pages/MathBackwardAnalysisQuest";
+import TeamRandomizerQuest from "./pages/TeamRandomizerQuest";
 import { UserProvider } from "./context/UserContext";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/quests/array-trainer" element={<ArrayTrainerQuest />} />
             <Route path="/quests/it-project-simulator" element={<ItProjectSimulatorQuest />} />
             <Route path="/quests/math-backward-analysis" element={<MathBackwardAnalysisQuest />} />
+            <Route path="/quests/team-randomizer" element={<TeamRandomizerQuest />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

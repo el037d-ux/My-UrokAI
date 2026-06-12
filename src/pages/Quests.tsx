@@ -68,6 +68,15 @@ const SPECIAL_QUESTS = [
     count: "3 задачи",
     path: "/quests/math-backward-analysis",
   },
+  {
+    id: "team-randomizer",
+    icon: "🎲",
+    title: "Рандомайзер команд",
+    desc: "Загрузи список имён — виджет разобьёт класс на команды, назначит роли (спикер, таймкипер, креатор) или выберет одного для ответа.",
+    color: "from-teal-500 to-emerald-600",
+    count: "бесплатно",
+    path: "/quests/team-randomizer",
+  },
 ];
 
 // ── Финансовый навигатор ─────────────────────────────────────────────────────
@@ -558,6 +567,7 @@ export default function Quests() {
                   title="Метапредмет"
                   color="from-teal-500 to-emerald-600"
                 >
+                  <SpecialCard q={SPECIAL_QUESTS.find(q => q.id === "team-randomizer")!} navigate={navigate} />
                   {QUESTS.map((q) => (
                     <NavCard key={q.id} q={q} onStart={() => startQuest(q.id)} />
                   ))}
