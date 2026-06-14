@@ -408,7 +408,7 @@ export default function Quests() {
   const navigate = useNavigate();
   const { status } = useUser();
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const isPaid = status?.plan !== "free";
+  const isPaid = true;
   const [screen, setScreen] = useState<Screen>("lobby");
   const [questId, setQuestId] = useState<string>("fin");
   const [current, setCurrent] = useState(0);
